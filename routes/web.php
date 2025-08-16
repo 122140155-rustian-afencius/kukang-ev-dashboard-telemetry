@@ -4,6 +4,10 @@ use App\Http\Controllers\TelemetryController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+Route::get('/login', function () {
+    return Inertia::render('Auth/Login');
+})->name('login');
+
 Route::middleware(['auth'])->group(function () {
     Route::redirect('/', '/live');
     Route::get('/live', [TelemetryController::class, 'live'])->name('live');
