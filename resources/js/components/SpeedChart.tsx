@@ -1,6 +1,11 @@
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import type { TelemetryPoint } from '@/types/telemetry';
 
-export default function SpeedChart({ data }) {
+interface Props {
+    data: TelemetryPoint[];
+}
+
+export default function SpeedChart({ data }: Props) {
     return (
         <ResponsiveContainer width="100%" height={200}>
             <LineChart data={data}>

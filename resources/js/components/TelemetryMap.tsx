@@ -1,9 +1,14 @@
 import { MapContainer, Marker, Polyline, TileLayer } from 'react-leaflet';
+import type { TelemetryPoint } from '@/types/telemetry';
 
-export default function TelemetryMap({ points }) {
+interface Props {
+    points: TelemetryPoint[];
+}
+
+export default function TelemetryMap({ points }: Props) {
     const last = points[points.length - 1];
-    const center = last ? [last.lat, last.lng] : [0, 0];
-    const path = points.map((p) => [p.lat, p.lng]);
+    const center: [number, number] = last ? [last.lat, last.lng] : [0, 0];
+    const path: [number, number][] = points.map((p) => [p.lat, p.lng]);
     return (
         <MapContainer center={center} zoom={15} style={{ height: 300, width: '100%' }}>
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />

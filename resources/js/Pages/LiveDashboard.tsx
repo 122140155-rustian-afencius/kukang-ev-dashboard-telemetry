@@ -6,14 +6,22 @@ import TempChart from '../components/TempChart';
 import TelemetryMap from '../components/TelemetryMap';
 import { Card } from '../components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import type { TelemetryPoint } from '@/types/telemetry';
+
+interface Connection {
+    bind: (event: string, cb: () => void) => void;
+    unbind: (event: string, cb: () => void) => void;
+}
 
 export default function LiveDashboard() {
-    const [vehicleId, setVehicleId] = useState('itera-01');
-    const [points, setPoints] = useState([]);
+    const [vehicleId, setVehicleId] = useState<string>('itera-01');
+    const [points, setPoints] = useState<TelemetryPoint[]>([]);
     const [connected, setConnected] = useState(false);
 
     useEffect(() => {
-        const connection = window.Echo.connector.pusher.connection;
+        const connection = (window.Echo as unknown as {
+            connector: { pusher: { connection: Connection } };
+        }).connector.pusher.connection;
         const onConnect = () => setConnected(true);
         const onDisconnect = () => setConnected(false);
         connection.bind('connected', onConnect);
@@ -26,7 +34,7 @@ export default function LiveDashboard() {
 
     useEffect(() => {
         const channel = window.Echo.channel(`telemetry.kukang.${vehicleId}`);
-        const handler = (e) => {
+        const handler = (e: TelemetryPoint) => {
             setPoints((prev) => {
                 const next = [...prev, e];
                 if (next.length > 600) next.shift();
