@@ -1,18 +1,17 @@
-import '../css/app.css';
-import 'leaflet/dist/leaflet.css';import 'leaflet/dist/leaflet.css';
 import { createInertiaApp } from '@inertiajs/react';
-import { createRoot } from 'react-dom/client';
-import { createRoot } from 'react-dom/client';
-import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
-import { registerSW } from 'virtual:pwa-register';
 import Echo from 'laravel-echo';
+import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
+import 'leaflet/dist/leaflet.css';
 import Pusher from 'pusher-js';
+import { createRoot } from 'react-dom/client';
+import { registerSW } from 'virtual:pwa-register';
+import '../css/app.css';
 
 registerSW();
 
 declare global {
     interface Window {
-        Echo: Echo;
+        Echo: Echo<'reverb'>;
         Pusher: typeof Pusher;
     }
 }
@@ -29,11 +28,7 @@ window.Echo = new Echo({
 });
 
 createInertiaApp({
-    resolve: (name) =>
-        resolvePageComponent(
-            `./Pages/${name}.tsx`,
-            import.meta.glob('./Pages/**/*.tsx')
-        ),
+    resolve: (name) => resolvePageComponent(`./Pages/${name}.tsx`, import.meta.glob('./Pages/**/*.tsx')),
     setup({ el, App, props }) {
         createRoot(el).render(<App {...props} />);
     },
