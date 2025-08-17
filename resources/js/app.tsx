@@ -1,3 +1,4 @@
+import { ThemeProvider } from '@/components/theme-provider';
 import { createInertiaApp } from '@inertiajs/react';
 import Echo from 'laravel-echo';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
@@ -30,6 +31,10 @@ window.Echo = new Echo({
 createInertiaApp({
     resolve: (name) => resolvePageComponent(`./Pages/${name}.tsx`, import.meta.glob('./Pages/**/*.tsx')),
     setup({ el, App, props }) {
-        createRoot(el).render(<App {...props} />);
+        createRoot(el).render(
+            <ThemeProvider defaultTheme="system" storageKey="kukang-ev-theme">
+                <App {...props} />
+            </ThemeProvider>,
+        );
     },
 });
