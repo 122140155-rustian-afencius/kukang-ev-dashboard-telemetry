@@ -19,24 +19,60 @@ class MqttConsumeTelemetry extends Command
 
     public function handle(): int
     {
-        $topic = config('mqtt.topic', 'kukang/telemetry/#');
+        $topic = rtrim((string) config('telemetry.topic_base', 'kukang/telemetry'), '/#');
 
         while (true) {
             try {
-                $client = MQTT::connection();
+                $client = MQTT::connection('consumer');
                 $this->info('Connected to MQTT broker');
 
                 $client->subscribe($topic, function (string $topic, string $message) {
                     try {
+                        Log::info('New MQTT telemetry data received', [
+                            'topic' => $topic,
+                            'message_size' => strlen($message),
+                            'timestamp' => now()->toISOString()
+                        ]);
+
                         $data = json_decode($message, true, 512, JSON_THROW_ON_ERROR);
-                        if (!is_array($data) || empty($data['ts']) || empty($data['vehicle_id'])) {
+                        if (!is_array($data) || empty($data['ts'])) {
                             Log::warning('Invalid telemetry payload', ['message' => $message]);
                             return;
                         }
 
-                        $payload = [
+                        // Build DB payload matching schema (no vehicle_id column)
+                        $dbPayload = [
                             'ts' => Carbon::parse($data['ts']),
-                            'vehicle_id' => $data['vehicle_id'],
+                            'esc_temp' => $data['suhu_esc'] ?? $data['esc_temp'] ?? null,
+                            'batt_temp' => $data['suhu_baterai'] ?? $data['batt_temp'] ?? null,
+                            'motor_temp' => $data['suhu_motor'] ?? $data['motor_temp'] ?? null,
+                            'current_a' => $data['arus'] ?? $data['current_a'] ?? null,
+                            'voltage_v' => $data['tegangan'] ?? $data['voltage_v'] ?? null,
+                            'latitude' => $data['lat'] ?? $data['latitude'] ?? null,
+                            'longitude' => $data['lng'] ?? $data['longitude'] ?? null,
+                            'speed_kmh' => $data['kecepatan'] ?? $data['speed_kmh'] ?? null,
+                            'rpm_motor' => $data['rpm_motor'] ?? null,
+                            'rpm_wheel' => $data['rpm_roda'] ?? $data['rpm_wheel'] ?? null,
+                            'acc_x' => Arr::get($data, 'accel.x') ?? ($data['acc_x'] ?? null),
+                            'acc_y' => Arr::get($data, 'accel.y') ?? ($data['acc_y'] ?? null),
+                            'acc_z' => Arr::get($data, 'accel.z') ?? ($data['acc_z'] ?? null),
+                            'gyro_x' => Arr::get($data, 'gyro.x') ?? ($data['gyro_x'] ?? null),
+                            'gyro_y' => Arr::get($data, 'gyro.y') ?? ($data['gyro_y'] ?? null),
+                            'gyro_z' => Arr::get($data, 'gyro.z') ?? ($data['gyro_z'] ?? null),
+                        ];
+
+                        DB::table('telemetry_raw')->insert($dbPayload);
+
+                        Log::info('Telemetry data successfully saved to database', [
+                            'timestamp' => $data['ts'],
+                            'data_points' => count(array_filter($dbPayload, fn($value) => $value !== null))
+                        ]);
+
+                        $this->line("✓ Telemetry data received and saved: {$data['ts']}");
+
+                        // Build broadcast payload with frontend-friendly keys
+                        $broadcastPayload = [
+                            'ts' => $data['ts'],
                             'suhu_esc' => $data['suhu_esc'] ?? null,
                             'suhu_baterai' => $data['suhu_baterai'] ?? null,
                             'suhu_motor' => $data['suhu_motor'] ?? null,
@@ -46,18 +82,8 @@ class MqttConsumeTelemetry extends Command
                             'lng' => $data['lng'] ?? null,
                             'kecepatan' => $data['kecepatan'] ?? null,
                             'rpm_motor' => $data['rpm_motor'] ?? null,
-                            'rpm_roda' => $data['rpm_roda'] ?? null,
-                            'accel_x' => Arr::get($data, 'accel.x'),
-                            'accel_y' => Arr::get($data, 'accel.y'),
-                            'accel_z' => Arr::get($data, 'accel.z'),
-                            'gyro_x' => Arr::get($data, 'gyro.x'),
-                            'gyro_y' => Arr::get($data, 'gyro.y'),
-                            'gyro_z' => Arr::get($data, 'gyro.z'),
                         ];
-
-                        DB::table('telemetry_raw')->insert($payload);
-
-                        event(new TelemetryUpdated($data['vehicle_id'], $payload));
+                        event(new TelemetryUpdated($broadcastPayload));
                     } catch (\Throwable $e) {
                         Log::warning('Failed to process telemetry message', ['error' => $e->getMessage()]);
                     }

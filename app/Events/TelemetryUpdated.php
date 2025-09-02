@@ -10,18 +10,16 @@ class TelemetryUpdated implements ShouldBroadcast
 {
     use SerializesModels;
 
-    public string $vehicleId;
     public array $payload;
 
-    public function __construct(string $vehicleId, array $payload)
+    public function __construct(array $payload)
     {
-        $this->vehicleId = $vehicleId;
         $this->payload = $payload;
     }
 
     public function broadcastOn(): Channel
     {
-        return new Channel("telemetry.kukang.{$this->vehicleId}");
+        return new Channel('telemetry.kukang');
     }
 
     public function broadcastWith(): array

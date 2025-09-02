@@ -9,5 +9,5 @@ return [
     'clean_session' => env('MQTT_CLEAN_SESSION', true),
     'timeout' => env('MQTT_TIMEOUT', 10),
     'keep_alive' => env('MQTT_KEEP_ALIVE', 60),
-    'topic' => env('MQTT_TOPIC', 'kukang/telemetry/#'),
+    'topic' => env('MQTT_TOPIC', 'kukang/telemetry'),
 ];

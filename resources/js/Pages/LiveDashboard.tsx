@@ -4,7 +4,6 @@ import CurrentChart from '../components/CurrentChart';
 import VoltageChart from '../components/VoltageChart';
 import TempChart from '../components/TempChart';
 import TelemetryMap from '../components/TelemetryMap';
-import { Card } from '../components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import type { TelemetryPoint } from '@/types/telemetry';
 
@@ -14,7 +13,6 @@ interface Connection {
 }
 
 export default function LiveDashboard() {
-    const [vehicleId, setVehicleId] = useState<string>('itera-01');
     const [points, setPoints] = useState<TelemetryPoint[]>([]);
     const [connected, setConnected] = useState(false);
 
@@ -33,7 +31,7 @@ export default function LiveDashboard() {
     }, []);
 
     useEffect(() => {
-        const channel = window.Echo.channel(`telemetry.kukang.${vehicleId}`);
+        const channel = window.Echo.channel('telemetry.kukang');
         const handler = (e: TelemetryPoint) => {
             setPoints((prev) => {
                 const next = [...prev, e];
@@ -44,9 +42,9 @@ export default function LiveDashboard() {
         channel.listen('TelemetryUpdated', handler);
         return () => {
             channel.stopListening('TelemetryUpdated');
-            window.Echo.leave(`telemetry.kukang.${vehicleId}`);
+            window.Echo.leave('telemetry.kukang');
         };
-    }, [vehicleId]);
+    }, []);
 
     return (
         <div className="p-4 space-y-4">
@@ -63,20 +61,7 @@ export default function LiveDashboard() {
                     {connected ? 'Connected' : 'Disconnected'}
                 </span>
             </nav>
-            <Card className="p-4 space-x-2 flex items-center">
-                <label htmlFor="vehicle" className="text-sm">
-                    Vehicle
-                </label>
-                <select
-                    id="vehicle"
-                    value={vehicleId}
-                    onChange={(e) => setVehicleId(e.target.value)}
-                    className="border rounded p-1"
-                >
-                    <option value="itera-01">itera-01</option>
-                    <option value="itera-02">itera-02</option>
-                </select>
-            </Card>
+            {/* Single-vehicle setup: no vehicle selector */}
             <Tabs defaultValue="charts" className="space-y-4">
                 <TabsList>
                     <TabsTrigger value="charts">Charts</TabsTrigger>

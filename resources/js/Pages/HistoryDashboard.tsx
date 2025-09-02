@@ -22,7 +22,6 @@ interface ApiPoint {
 }
 
 export default function HistoryDashboard() {
-    const [vehicleId, setVehicleId] = useState<string>('itera-01');
     const [start, setStart] = useState<string>('');
     const [end, setEnd] = useState<string>('');
     const [resolution, setResolution] = useState<string>('1s');
@@ -34,7 +33,7 @@ export default function HistoryDashboard() {
         setLoading(true);
         setError('');
         try {
-            const params = new URLSearchParams({ vehicle_id: vehicleId, resolution });
+            const params = new URLSearchParams({ resolution });
             if (start) params.append('start', start);
             if (end) params.append('end', end);
             const res = await fetch(`/api/telemetry/history?${params.toString()}`);
@@ -96,18 +95,6 @@ export default function HistoryDashboard() {
             </nav>
             <Card className="p-4 space-y-2">
                 <div className="flex space-x-2 items-center">
-                    <label htmlFor="vehicle" className="text-sm">
-                        Vehicle
-                    </label>
-                    <select
-                        id="vehicle"
-                        value={vehicleId}
-                        onChange={(e) => setVehicleId(e.target.value)}
-                        className="border rounded p-1"
-                    >
-                        <option value="itera-01">itera-01</option>
-                        <option value="itera-02">itera-02</option>
-                    </select>
                     <input
                         type="datetime-local"
                         value={start}
