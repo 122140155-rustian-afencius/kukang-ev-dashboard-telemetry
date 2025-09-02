@@ -14,9 +14,7 @@ use PhpMqtt\Client\Facades\MQTT;
 class MqttConsumeTelemetry extends Command
 {
     protected $signature = 'mqtt:telemetry';
-
     protected $description = 'Consume telemetry messages from MQTT broker';
-
     public function handle(): int
     {
         $topic = rtrim((string) config('telemetry.topic_base', 'kukang/telemetry'), '/#');
@@ -40,7 +38,6 @@ class MqttConsumeTelemetry extends Command
                             return;
                         }
 
-                        // Build DB payload matching schema (no vehicle_id column)
                         $dbPayload = [
                             'ts' => Carbon::parse($data['ts']),
                             'esc_temp' => $data['suhu_esc'] ?? $data['esc_temp'] ?? null,
@@ -51,7 +48,6 @@ class MqttConsumeTelemetry extends Command
                             'latitude' => $data['lat'] ?? $data['latitude'] ?? null,
                             'longitude' => $data['lng'] ?? $data['longitude'] ?? null,
                             'speed_kmh' => $data['kecepatan'] ?? $data['speed_kmh'] ?? null,
-                            'rpm_motor' => $data['rpm_motor'] ?? null,
                             'rpm_wheel' => $data['rpm_roda'] ?? $data['rpm_wheel'] ?? null,
                             'acc_x' => Arr::get($data, 'accel.x') ?? ($data['acc_x'] ?? null),
                             'acc_y' => Arr::get($data, 'accel.y') ?? ($data['acc_y'] ?? null),
@@ -70,7 +66,6 @@ class MqttConsumeTelemetry extends Command
 
                         $this->line("✓ Telemetry data received and saved: {$data['ts']}");
 
-                        // Build broadcast payload with frontend-friendly keys
                         $broadcastPayload = [
                             'ts' => $data['ts'],
                             'suhu_esc' => $data['suhu_esc'] ?? null,
@@ -82,6 +77,13 @@ class MqttConsumeTelemetry extends Command
                             'lng' => $data['lng'] ?? null,
                             'kecepatan' => $data['kecepatan'] ?? null,
                             'rpm_motor' => $data['rpm_motor'] ?? null,
+                            'rpm_wheel' => $data['rpm_wheel'] ?? $data['rpm_roda'] ?? null,
+                            'acc_x' => Arr::get($data, 'accel.x') ?? ($data['acc_x'] ?? null),
+                            'acc_y' => Arr::get($data, 'accel.y') ?? ($data['acc_y'] ?? null),
+                            'acc_z' => Arr::get($data, 'accel.z') ?? ($data['acc_z'] ?? null),
+                            'gyro_x' => Arr::get($data, 'gyro.x') ?? ($data['gyro_x'] ?? null),
+                            'gyro_y' => Arr::get($data, 'gyro.y') ?? ($data['gyro_y'] ?? null),
+                            'gyro_z' => Arr::get($data, 'gyro.z') ?? ($data['gyro_z'] ?? null),
                         ];
                         event(new TelemetryUpdated($broadcastPayload));
                     } catch (\Throwable $e) {

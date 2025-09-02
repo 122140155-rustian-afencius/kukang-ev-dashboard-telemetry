@@ -5,6 +5,7 @@ namespace App\Events;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Arr;
 
 class TelemetryUpdated implements ShouldBroadcast
 {
@@ -35,6 +36,13 @@ class TelemetryUpdated implements ShouldBroadcast
             'suhu_esc' => $this->payload['suhu_esc'] ?? null,
             'suhu_baterai' => $this->payload['suhu_baterai'] ?? null,
             'suhu_motor' => $this->payload['suhu_motor'] ?? null,
+            'rpm_wheel' => $this->payload['rpm_wheel'] ?? $this->payload['rpm_roda'] ?? null,
+            'acc_x' => $this->payload['acc_x'] ?? Arr::get($this->payload, 'accel.x'),
+            'acc_y' => $this->payload['acc_y'] ?? Arr::get($this->payload, 'accel.y'),
+            'acc_z' => $this->payload['acc_z'] ?? Arr::get($this->payload, 'accel.z'),
+            'gyro_x' => $this->payload['gyro_x'] ?? Arr::get($this->payload, 'gyro.x'),
+            'gyro_y' => $this->payload['gyro_y'] ?? Arr::get($this->payload, 'gyro.y'),
+            'gyro_z' => $this->payload['gyro_z'] ?? Arr::get($this->payload, 'gyro.z'),
         ];
     }
 }

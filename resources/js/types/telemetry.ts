@@ -9,4 +9,12 @@ export interface TelemetryPoint {
     suhu_esc: number;
     suhu_baterai: number;
     suhu_motor: number;
+    // Optional fields for extended telemetry
+    rpm_wheel?: number | null;
+    acc_x?: number | null;
+    acc_y?: number | null;
+    acc_z?: number | null;
+    gyro_x?: number | null;
+    gyro_y?: number | null;
+    gyro_z?: number | null;
 }

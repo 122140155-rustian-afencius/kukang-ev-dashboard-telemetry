@@ -78,7 +78,7 @@ class MqttPublishTelemetry extends Command
         $tegangan    = $this->randFloat(40, 80);   // V
         $kecepatan   = $this->randFloat(0, 120);   // km/h
         $rpmMotor    = rand(0, 6000);
-        $rpmRoda     = rand(0, 2000);
+        $rpmwheel     = rand(0, 2000);
 
         // Simulated GPS around a point (e.g., Jakarta)
         $latBase = -6.200000; // Jakarta approx
@@ -97,7 +97,7 @@ class MqttPublishTelemetry extends Command
             'lng' => round($lng, 6),
             'kecepatan' => round($kecepatan, 2),
             'rpm_motor' => $rpmMotor,
-            'rpm_roda' => $rpmRoda,
+            'rpm_wheel' => $rpmwheel,
             'accel' => [
                 'x' => $this->randFloat(-2, 2),
                 'y' => $this->randFloat(-2, 2),
