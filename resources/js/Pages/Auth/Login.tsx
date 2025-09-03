@@ -1,10 +1,12 @@
 'use client';
 
+import { ShimmerButton } from '@/components/magicui/shimmer-button';
+import { ShineBorder } from '@/components/magicui/shine-border';
 import { ModeToggle } from '@/components/mode-toggle';
-import { BackgroundBeams } from '@/components/ui/background-beams';
-import { TextShimmer } from '@/components/ui/text-shimmer';
+import { RetroGrid } from '@/components/magicui/retro-grid';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { TextShimmer } from '@/components/ui/text-shimmer';
 import { cn } from '@/lib/utils';
 import React from 'react';
 
@@ -19,6 +21,7 @@ export default function Login() {
                 <ModeToggle />
             </div>
             <div className="pointer-events-auto relative z-[20] mx-auto w-full max-w-md rounded-none bg-white p-4 shadow-input md:rounded-2xl md:p-8 dark:bg-black">
+                <ShineBorder shineColor={['#DC143C', '#DAA520', '#8B4513']} />
                 <div className="mb-2 flex justify-center">
                     <img src="/logo-kukang.png" alt="Kukang EV Logo" className="h-20 w-auto" />
                 </div>
@@ -35,32 +38,19 @@ export default function Login() {
                         <Label htmlFor="email">Email Address</Label>
                         <Input id="email" placeholder="ikuproto@kukangev.com" type="email" />
                     </LabelInputContainer>
-                    <LabelInputContainer className="mb-4">
+                    <LabelInputContainer className="mb-8">
                         <Label htmlFor="password">Password</Label>
                         <Input id="password" placeholder="••••••••" type="password" />
                     </LabelInputContainer>
-                    <button
-                        className="group/btn relative block h-10 w-full cursor-pointer rounded-md bg-gradient-to-br from-black to-neutral-600 font-medium text-white shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:bg-zinc-800 dark:from-zinc-900 dark:to-zinc-900 dark:shadow-[0px_1px_0px_0px_#27272a_inset,0px_-1px_0px_0px_#27272a_inset]"
-                        type="submit"
-                    >
-                        Login &rarr;
-                        <BottomGradient />
-                    </button>
+                    <ShimmerButton className="w-full font-medium" type="submit" shimmerColor="#DC143C" borderRadius="15px">
+                        Login
+                    </ShimmerButton>
                 </form>
             </div>
-            <BackgroundBeams />
+            <RetroGrid darkLineColor="#DC143C" />
         </div>
     );
 }
-
-const BottomGradient = () => {
-    return (
-        <>
-            <span className="absolute inset-x-0 -bottom-px block h-px w-full bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-0 transition duration-500 group-hover/btn:opacity-100" />
-            <span className="absolute inset-x-10 -bottom-px mx-auto block h-px w-1/2 bg-gradient-to-r from-transparent via-indigo-500 to-transparent opacity-0 blur-sm transition duration-500 group-hover/btn:opacity-100" />
-        </>
-    );
-};
 
 const LabelInputContainer = ({ children, className }: { children: React.ReactNode; className?: string }) => {
     return <div className={cn('flex w-full flex-col space-y-2', className)}>{children}</div>;
