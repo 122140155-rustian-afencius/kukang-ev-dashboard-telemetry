@@ -1,5 +1,8 @@
 import type { TelemetryPoint } from '@/types/telemetry';
 import { useEffect, useMemo, useState } from 'react';
+import { Sidebar, SidebarBody, SidebarLink } from '@/components/ui/sidebar';
+import { IconArrowLeft, IconBrandTabler, IconSettings, IconUserBolt } from '@tabler/icons-react';
+import { motion } from 'motion/react';
 
 interface Connection {
     bind: (event: string, cb: () => void) => void;
@@ -9,6 +12,7 @@ interface Connection {
 export default function LiveDashboard() {
     const [rows, setRows] = useState<TelemetryPoint[]>([]);
     const [connected, setConnected] = useState(false);
+    const [open, setOpen] = useState(false);
 
     useEffect(() => {
         const connection = (
@@ -135,71 +139,180 @@ export default function LiveDashboard() {
         return String(value);
     };
 
-    return (
-        <div className="space-y-4 p-4">
-            <nav className="flex items-center justify-between">
-                <div className="space-x-4">
-                    <a href="/live" className="font-semibold">
-                        Live
-                    </a>
-                    <a href="/history" className="hover:underline">
-                        History
-                    </a>
-                </div>
-                <div className="flex items-center gap-2">
-                    <span className={`rounded px-2 py-1 text-xs ${connected ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
-                        {connected ? 'Connected' : 'Disconnected'}
-                    </span>
-                    <button onClick={() => setRows([])} className="rounded border px-2 py-1 text-xs hover:bg-secondary" title="Clear rows">
-                        Clear
-                    </button>
-                </div>
-            </nav>
+    const links = useMemo(
+        () => [
+            {
+                label: 'Dashboard',
+                href: '#',
+                icon: (
+                    <IconBrandTabler className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+                ),
+            },
+            {
+                label: 'Profile',
+                href: '#',
+                icon: (
+                    <IconUserBolt className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+                ),
+            },
+            {
+                label: 'Settings',
+                href: '#',
+                icon: (
+                    <IconSettings className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+                ),
+            },
+            {
+                label: 'Logout',
+                href: '#',
+                icon: (
+                    <IconArrowLeft className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
+                ),
+            },
+        ],
+        []
+    );
 
-            <div className="overflow-auto rounded border">
-                <table className="min-w-full text-sm">
-                    <thead className="bg-secondary/60">
-                        <tr>
-                            {headers.map((h) => (
-                                <th key={h.key} className="px-3 py-2 text-left font-semibold whitespace-nowrap">
-                                    {h.label}
-                                </th>
+    return (
+        <div
+            className={
+                'flex w-full flex-1 flex-col overflow-hidden rounded-md border border-neutral-200 bg-gray-100 md:flex-row dark:border-neutral-700 dark:bg-neutral-800 h-screen'
+            }
+        >
+            <Sidebar open={open} setOpen={setOpen}>
+                <SidebarBody className="justify-between gap-10">
+                    <div className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
+                        {open ? <Logo /> : <LogoIcon />}
+                        <div className="mt-8 flex flex-col gap-2">
+                            {links.map((link, idx) => (
+                                <SidebarLink key={idx} link={link} />
                             ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {rows.length === 0 ? (
-                            <tr>
-                                <td className="px-3 py-3 text-center text-muted-foreground" colSpan={headers.length}>
-                                    Waiting for telemetry...
-                                </td>
-                            </tr>
-                        ) : (
-                            rows.map((row, idx) => (
-                                <tr key={`${row.ts}-${idx}`} className={idx % 2 ? 'bg-secondary/20' : undefined}>
-                                    <td className="px-3 py-2 whitespace-nowrap">{format(row.ts)}</td>
-                                    <td className="px-3 py-2">{format(row.lat)}</td>
-                                    <td className="px-3 py-2">{format(row.lng)}</td>
-                                    <td className="px-3 py-2">{format(row.speed_kmh)}</td>
-                                    <td className="px-3 py-2">{format(row.current_a)}</td>
-                                    <td className="px-3 py-2">{format(row.voltage_v)}</td>
-                                    <td className="px-3 py-2">{format(row.rpm_motor)}</td>
-                                    <td className="px-3 py-2">{format(row.rpm_wheel)}</td>
-                                    <td className="px-3 py-2">{format(row.acc_x)}</td>
-                                    <td className="px-3 py-2">{format(row.acc_y)}</td>
-                                    <td className="px-3 py-2">{format(row.acc_z)}</td>
-                                    <td className="px-3 py-2">{format(row.gyro_x)}</td>
-                                    <td className="px-3 py-2">{format(row.gyro_y)}</td>
-                                    <td className="px-3 py-2">{format(row.gyro_z)}</td>
-                                    <td className="px-3 py-2">{format(row.suhu_esc)}</td>
-                                    <td className="px-3 py-2">{format(row.suhu_baterai)}</td>
-                                    <td className="px-3 py-2">{format(row.suhu_motor)}</td>
+                        </div>
+                    </div>
+                    <div>
+                        <SidebarLink
+                            link={{
+                                label: 'Technical Manager',
+                                href: '#',
+                                icon: (
+                                    <img
+                                        src="https://assets.aceternity.com/manu.png"
+                                        className="h-7 w-7 shrink-0 rounded-full"
+                                        width={50}
+                                        height={50}
+                                        alt="Avatar"
+                                    />
+                                ),
+                            }}
+                        />
+                    </div>
+                </SidebarBody>
+            </Sidebar>
+
+            <div className="flex flex-1">
+                <div className="flex h-full w-full flex-1 flex-col gap-2 rounded-tl-2xl border border-neutral-200 bg-white p-2 md:p-10 dark:border-neutral-700 dark:bg-neutral-900">
+                    <div className="flex items-center justify-between">
+                        <h1 className="text-lg font-semibold">Live Telemetry</h1>
+                        <div className="flex items-center gap-2">
+                            <span
+                                className={`rounded px-2 py-1 text-xs ${connected ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}
+                            >
+                                {connected ? 'Connected' : 'Disconnected'}
+                            </span>
+                            <button
+                                onClick={() => setRows([])}
+                                className="rounded border px-2 py-1 text-xs hover:bg-secondary"
+                                title="Clear rows"
+                            >
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="overflow-auto rounded border">
+                        <table className="min-w-full text-sm">
+                            <thead className="bg-secondary/60">
+                                <tr>
+                                    {headers.map((h) => (
+                                        <th
+                                            key={h.key}
+                                            className="px-3 py-2 text-left font-semibold whitespace-nowrap"
+                                        >
+                                            {h.label}
+                                        </th>
+                                    ))}
                                 </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+                            </thead>
+                            <tbody>
+                                {rows.length === 0 ? (
+                                    <tr>
+                                        <td
+                                            className="px-3 py-3 text-center text-muted-foreground"
+                                            colSpan={headers.length}
+                                        >
+                                            Waiting for telemetry...
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    rows.map((row, idx) => (
+                                        <tr
+                                            key={`${row.ts}-${idx}`}
+                                            className={idx % 2 ? 'bg-secondary/20' : undefined}
+                                        >
+                                            <td className="px-3 py-2 whitespace-nowrap">{format(row.ts)}</td>
+                                            <td className="px-3 py-2">{format(row.lat)}</td>
+                                            <td className="px-3 py-2">{format(row.lng)}</td>
+                                            <td className="px-3 py-2">{format(row.speed_kmh)}</td>
+                                            <td className="px-3 py-2">{format(row.current_a)}</td>
+                                            <td className="px-3 py-2">{format(row.voltage_v)}</td>
+                                            <td className="px-3 py-2">{format(row.rpm_motor)}</td>
+                                            <td className="px-3 py-2">{format(row.rpm_wheel)}</td>
+                                            <td className="px-3 py-2">{format(row.acc_x)}</td>
+                                            <td className="px-3 py-2">{format(row.acc_y)}</td>
+                                            <td className="px-3 py-2">{format(row.acc_z)}</td>
+                                            <td className="px-3 py-2">{format(row.gyro_x)}</td>
+                                            <td className="px-3 py-2">{format(row.gyro_y)}</td>
+                                            <td className="px-3 py-2">{format(row.gyro_z)}</td>
+                                            <td className="px-3 py-2">{format(row.suhu_esc)}</td>
+                                            <td className="px-3 py-2">{format(row.suhu_baterai)}</td>
+                                            <td className="px-3 py-2">{format(row.suhu_motor)}</td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     );
 }
+
+export const Logo = () => {
+    return (
+        <a
+            href="#"
+            className="relative z-20 flex items-center space-x-2 py-1 text-sm font-normal text-black"
+        >
+            <div className="h-5 w-6 shrink-0 rounded-tl-lg rounded-tr-sm rounded-br-lg rounded-bl-sm bg-black dark:bg-white" />
+            <motion.span
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="font-medium whitespace-pre text-black dark:text-white"
+            >
+                KUKANG EV ITERA
+            </motion.span>
+        </a>
+    );
+};
+
+export const LogoIcon = () => {
+    return (
+        <a
+            href="#"
+            className="relative z-20 flex items-center space-x-2 py-1 text-sm font-normal text-black"
+        >
+            <div className="h-5 w-6 shrink-0 rounded-tl-lg rounded-tr-sm rounded-br-lg rounded-bl-sm bg-black dark:bg-white" />
+        </a>
+    );
+};
