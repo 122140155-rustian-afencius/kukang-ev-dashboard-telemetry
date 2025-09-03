@@ -1,7 +1,7 @@
 'use client';
 
 import { ModeToggle } from '@/components/mode-toggle';
-import { BackgroundLines } from '@/components/ui/background-lines';
+import { BackgroundBeams } from '@/components/ui/background-beams';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
@@ -13,23 +13,22 @@ export default function Login() {
         console.log('Form submitted');
     };
     return (
-        <BackgroundLines className="flex min-h-screen items-center justify-center">
+        <div className="flex min-h-screen items-center justify-center">
             <div className="absolute top-4 right-4 z-20">
                 <ModeToggle />
             </div>
-
-            <div className="relative z-10 mx-auto w-full max-w-md rounded-none bg-white p-4 shadow-input md:rounded-2xl md:p-8 dark:bg-black">
+            <div className="pointer-events-auto relative z-[20] mx-auto w-full max-w-md rounded-none bg-white p-4 shadow-input md:rounded-2xl md:p-8 dark:bg-black">
                 <div className="mb-2 flex justify-center">
                     <img src="/logo-kukang.png" alt="Kukang EV Logo" className="h-20 w-auto" />
                 </div>
                 <h2 className="text-center text-xl font-bold text-neutral-800 dark:text-neutral-200">
-                    Kukang EV <br />
+                    Kukang EV ITERA
+                    <br />
                     Dashboard Telemetry
                 </h2>
                 <p className="mt-2 max-w-sm text-center text-sm text-neutral-600 dark:text-neutral-300">
                     Enter your email and password to get access to the telemetry dashboard
                 </p>
-
                 <form className="my-8" onSubmit={handleSubmit}>
                     <LabelInputContainer className="mb-4">
                         <Label htmlFor="email">Email Address</Label>
@@ -46,10 +45,10 @@ export default function Login() {
                         Login &rarr;
                         <BottomGradient />
                     </button>
-                    <div className="my-8 h-[1px] w-full bg-gradient-to-r from-transparent via-neutral-300 to-transparent dark:via-neutral-700" />
                 </form>
             </div>
-        </BackgroundLines>
+            <BackgroundBeams />
+        </div>
     );
 }
 
