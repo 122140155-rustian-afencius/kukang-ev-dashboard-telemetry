@@ -2,6 +2,7 @@
 
 import { ModeToggle } from '@/components/mode-toggle';
 import { BackgroundBeams } from '@/components/ui/background-beams';
+import { TextShimmer } from '@/components/ui/text-shimmer';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
@@ -22,11 +23,11 @@ export default function Login() {
                     <img src="/logo-kukang.png" alt="Kukang EV Logo" className="h-20 w-auto" />
                 </div>
                 <h2 className="text-center text-xl font-bold text-neutral-800 dark:text-neutral-200">
-                    Kukang EV ITERA
-                    <br />
-                    Dashboard Telemetry
+                    <TextShimmer duration={4} spread={3}>
+                        KUKANG EV ITERA
+                    </TextShimmer>
                 </h2>
-                <p className="mt-2 max-w-sm text-center text-sm text-neutral-600 dark:text-neutral-300">
+                <p className="mt-6 max-w-sm text-center text-sm text-neutral-600 dark:text-neutral-300">
                     Enter your email and password to get access to the telemetry dashboard
                 </p>
                 <form className="my-8" onSubmit={handleSubmit}>
