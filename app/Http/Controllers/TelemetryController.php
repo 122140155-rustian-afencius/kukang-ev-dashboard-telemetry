@@ -14,11 +14,6 @@ class TelemetryController extends Controller
         return Inertia::render('LiveDashboard');
     }
 
-    public function history()
-    {
-        return Inertia::render('HistoryDashboard');
-    }
-
     public function historyApi(Request $request)
     {
         $data = $request->validate([
