@@ -25,21 +25,25 @@ export default function Login() {
         }
     };
     return (
-        <div className="flex min-h-screen items-center justify-center px-4 sm:px-6">
-            <div className="absolute top-4 right-4 z-20">
+        <div className="flex min-h-screen items-center justify-center px-3 py-6 sm:px-6 lg:px-8">
+            <div className="absolute top-3 right-3 z-20 sm:top-4 sm:right-4">
                 <ModeToggle />
             </div>
-            <div className="pointer-events-auto relative z-[20] mx-4 w-full max-w-md rounded-xl bg-white p-4 shadow-input md:mx-auto md:rounded-2xl md:p-8 dark:bg-black">
+            <div className="pointer-events-auto relative z-[20] mx-auto w-full max-w-sm rounded-lg bg-white p-6 shadow-input sm:max-w-md sm:rounded-xl sm:p-8 md:rounded-2xl dark:bg-black">
                 <ShineBorder shineColor={['#DC143C', '#DAA520', '#8B4513']} />
-                <div className="mb-2 flex justify-center">
-                    <img src="/logo-kukang.png" alt="Kukang EV Logo" className="h-16 w-auto sm:h-20" />
+                <div className="mb-4 flex justify-center sm:mb-6">
+                    <img 
+                        src="/logo-kukang.png" 
+                        alt="Kukang EV Logo" 
+                        className="h-12 w-auto sm:h-16 md:h-20" 
+                    />
                 </div>
-                <h2 className="text-center text-lg font-bold text-neutral-800 sm:text-xl dark:text-neutral-200">
+                <h2 className="text-center text-base font-bold text-neutral-800 sm:text-lg md:text-xl dark:text-neutral-200">
                     <TextShimmer duration={4} spread={3}>
                         KUKANG EV ITERA
                     </TextShimmer>
                 </h2>
-                <p className="mt-4 max-w-sm text-center text-xs text-neutral-600 sm:mt-6 sm:text-sm dark:text-neutral-300">
+                <p className="mt-3 max-w-sm text-center text-xs leading-relaxed text-neutral-600 sm:mt-4 sm:text-sm md:mt-6 dark:text-neutral-300">
                     Enter your email and password to get access to the telemetry dashboard
                 </p>
                 <form className="my-8" onSubmit={handleSubmit}>
@@ -62,7 +66,7 @@ export default function Login() {
                     </div>
                 </form>
             </div>
-            <RetroGrid className="opacity-40 sm:opacity-60 md:opacity-80" darkLineColor="#DC143C" />
+            <RetroGrid className="opacity-90 sm:opacity-60 md:opacity-60" darkLineColor="#DC143C" />
         </div>
     );
 }
