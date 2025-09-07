@@ -14,6 +14,44 @@ class TelemetryController extends Controller
         return Inertia::render('LiveDashboard');
     }
 
+    public function overview()
+    {
+        // Get the latest snapshot from raw telemetry (adjust table/columns if needed)
+        $latest = DB::table('telemetry_raw')
+            ->select([
+                'ts',
+                'latitude as lat',
+                'longitude as lng',
+                'speed_kmh',
+                'current_a',
+                'esc_temp',
+            ])
+            ->orderByDesc('ts')
+            ->first();
+
+        // Last 60 samples (or fallback to 0) for sparklines
+        $history = DB::table('telemetry_raw')
+            ->select(['current_a', 'esc_temp'])
+            ->orderByDesc('ts')
+            ->limit(60)
+            ->get();
+
+        $currentHistory = $history->pluck('current_a')->reverse()->values();
+        $escTempHistory = $history->pluck('esc_temp')->reverse()->values();
+
+        return Inertia::render('Telemetry/Overview', [
+            'telemetry' => [
+                'speed_kmh' => $latest->speed_kmh ?? 0,
+                'current_a' => $latest->current_a ?? 0,
+                'suhu_esc' => $latest->esc_temp ?? 0,
+                'lat' => $latest->lat ?? 0,
+                'lng' => $latest->lng ?? 0,
+                'current_history' => $currentHistory,
+                'suhu_esc_history' => $escTempHistory,
+            ],
+        ]);
+    }
+
     public function historyApi(Request $request)
     {
         $data = $request->validate([
@@ -65,5 +103,11 @@ class TelemetryController extends Controller
         }
 
         return response()->json(['points' => $points]);
+    }
+
+    public function history()
+    {
+        // Client will fetch history via /api/telemetry/history; render the page shell
+        return Inertia::render('Telemetry/History');
     }
 }

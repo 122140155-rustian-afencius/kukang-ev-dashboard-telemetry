@@ -1,8 +1,9 @@
+import LiveMap from '@/components/telemetry/LiveMap';
+import SpeedGauge from '@/components/telemetry/SpeedGauge';
+import StatCard from '@/components/telemetry/StatCard';
+import AppShell from '@/layouts/AppShell';
 import type { TelemetryPoint } from '@/types/telemetry';
 import { useEffect, useMemo, useState } from 'react';
-import { Sidebar, SidebarBody, SidebarLink } from '@/components/ui/sidebar';
-import { IconArrowLeft, IconBrandTabler, IconSettings, IconUserBolt } from '@tabler/icons-react';
-import { motion } from 'motion/react';
 
 interface Connection {
     bind: (event: string, cb: () => void) => void;
@@ -12,7 +13,6 @@ interface Connection {
 export default function LiveDashboard() {
     const [rows, setRows] = useState<TelemetryPoint[]>([]);
     const [connected, setConnected] = useState(false);
-    const [open, setOpen] = useState(false);
 
     useEffect(() => {
         const connection = (
@@ -107,27 +107,29 @@ export default function LiveDashboard() {
         };
     }, []);
 
-    const headers = useMemo(
-        () => [
-            { key: 'ts', label: 'Timestamp' },
-            { key: 'lat', label: 'Lat' },
-            { key: 'lng', label: 'Lng' },
-            { key: 'speed_kmh', label: 'Speed (km/h)' },
-            { key: 'current_a', label: 'Current (A)' },
-            { key: 'voltage_v', label: 'Voltage (V)' },
-            { key: 'rpm_motor', label: 'RPM Motor' },
-            { key: 'rpm_wheel', label: 'RPM Roda' },
-            { key: 'acc_x', label: 'Acc X (m/s²)' },
-            { key: 'acc_y', label: 'Acc Y (m/s²)' },
-            { key: 'acc_z', label: 'Acc Z (m/s²)' },
-            { key: 'gyro_x', label: 'Gyro X (°/s)' },
-            { key: 'gyro_y', label: 'Gyro Y (°/s)' },
-            { key: 'gyro_z', label: 'Gyro Z (°/s)' },
-            { key: 'suhu_esc', label: 'ESC Temp (°C)' },
-            { key: 'suhu_baterai', label: 'Batt Temp (°C)' },
-            { key: 'suhu_motor', label: 'Motor Temp (°C)' },
-        ],
-        [],
+    const latest = rows[0];
+    const speed = Number.isFinite(latest?.speed_kmh) ? (latest!.speed_kmh as number) : 0;
+    const current = Number.isFinite(latest?.current_a) ? (latest!.current_a as number) : 0;
+    const escTemp = Number.isFinite(latest?.suhu_esc) ? (latest!.suhu_esc as number) : 0;
+    const lat = Number.isFinite(latest?.lat) ? (latest!.lat as number) : 0;
+    const lng = Number.isFinite(latest?.lng) ? (latest!.lng as number) : 0;
+    const currentHistory = useMemo(
+        () =>
+            rows
+                .slice(0, 60)
+                .map((r) => r.current_a)
+                .reverse()
+                .filter((v) => Number.isFinite(v)),
+        [rows],
+    );
+    const escTempHistory = useMemo(
+        () =>
+            rows
+                .slice(0, 60)
+                .map((r) => r.suhu_esc)
+                .reverse()
+                .filter((v) => Number.isFinite(v)),
+        [rows],
     );
 
     const format = (value: unknown) => {
@@ -139,180 +141,51 @@ export default function LiveDashboard() {
         return String(value);
     };
 
-    const links = useMemo(
-        () => [
-            {
-                label: 'Dashboard',
-                href: '#',
-                icon: (
-                    <IconBrandTabler className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-                ),
-            },
-            {
-                label: 'Profile',
-                href: '#',
-                icon: (
-                    <IconUserBolt className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-                ),
-            },
-            {
-                label: 'Settings',
-                href: '#',
-                icon: (
-                    <IconSettings className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-                ),
-            },
-            {
-                label: 'Logout',
-                href: '#',
-                icon: (
-                    <IconArrowLeft className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-                ),
-            },
-        ],
-        []
-    );
-
     return (
-        <div
-            className={
-                'flex w-full flex-1 flex-col overflow-hidden rounded-md border border-neutral-200 bg-gray-100 md:flex-row dark:border-neutral-700 dark:bg-neutral-800 h-screen'
-            }
-        >
-            <Sidebar open={open} setOpen={setOpen}>
-                <SidebarBody className="justify-between gap-10">
-                    <div className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
-                        {open ? <Logo /> : <LogoIcon />}
-                        <div className="mt-8 flex flex-col gap-2">
-                            {links.map((link, idx) => (
-                                <SidebarLink key={idx} link={link} />
-                            ))}
-                        </div>
+        <AppShell>
+            <div className="flex h-screen w-full flex-1 flex-col gap-3 overflow-hidden rounded-tl-2xl border border-neutral-200 bg-white p-3 dark:border-neutral-700 dark:bg-neutral-900">
+                {/* Header */}
+                <div className="flex flex-shrink-0 items-center justify-between">
+                    <h1 className="text-lg font-semibold">Live Telemetry</h1>
+                    <div className="flex items-center gap-2">
+                        <span className={`rounded px-2 py-1 text-xs ${connected ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
+                            {connected ? 'Connected' : 'Disconnected'}
+                        </span>
+                        <button onClick={() => setRows([])} className="rounded border px-2 py-1 text-xs hover:bg-secondary" title="Clear rows">
+                            Clear
+                        </button>
                     </div>
-                    <div>
-                        <SidebarLink
-                            link={{
-                                label: 'Technical Manager',
-                                href: '#',
-                                icon: (
-                                    <img
-                                        src="https://assets.aceternity.com/manu.png"
-                                        className="h-7 w-7 shrink-0 rounded-full"
-                                        width={50}
-                                        height={50}
-                                        alt="Avatar"
-                                    />
-                                ),
-                            }}
-                        />
-                    </div>
-                </SidebarBody>
-            </Sidebar>
+                </div>
 
-            <div className="flex flex-1">
-                <div className="flex h-full w-full flex-1 flex-col gap-2 rounded-tl-2xl border border-neutral-200 bg-white p-2 md:p-10 dark:border-neutral-700 dark:bg-neutral-900">
-                    <div className="flex items-center justify-between">
-                        <h1 className="text-lg font-semibold">Live Telemetry</h1>
-                        <div className="flex items-center gap-2">
-                            <span
-                                className={`rounded px-2 py-1 text-xs ${connected ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}
-                            >
-                                {connected ? 'Connected' : 'Disconnected'}
-                            </span>
-                            <button
-                                onClick={() => setRows([])}
-                                className="rounded border px-2 py-1 text-xs hover:bg-secondary"
-                                title="Clear rows"
-                            >
-                                Clear
-                            </button>
+                {/* First Row: 3 columns - Current, Speed (center), ESC Temp */}
+                <div className="grid flex-shrink-0 grid-cols-3 gap-4" style={{ height: '35vh' }}>
+                    {/* Current Card */}
+                    <div className="col-span-1">
+                        <StatCard title="Current" value={current} unit="A" trend={currentHistory as number[]} accent="blue" />
+                    </div>
+
+                    {/* Speed Gauge (Center) */}
+                    <div className="col-span-1 flex flex-col rounded-xl border border-neutral-800 bg-neutral-950/70">
+                        <div className="flex flex-1 items-center justify-center">
+                            <SpeedGauge value={speed} />
                         </div>
                     </div>
 
-                    <div className="overflow-auto rounded border">
-                        <table className="min-w-full text-sm">
-                            <thead className="bg-secondary/60">
-                                <tr>
-                                    {headers.map((h) => (
-                                        <th
-                                            key={h.key}
-                                            className="px-3 py-2 text-left font-semibold whitespace-nowrap"
-                                        >
-                                            {h.label}
-                                        </th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {rows.length === 0 ? (
-                                    <tr>
-                                        <td
-                                            className="px-3 py-3 text-center text-muted-foreground"
-                                            colSpan={headers.length}
-                                        >
-                                            Waiting for telemetry...
-                                        </td>
-                                    </tr>
-                                ) : (
-                                    rows.map((row, idx) => (
-                                        <tr
-                                            key={`${row.ts}-${idx}`}
-                                            className={idx % 2 ? 'bg-secondary/20' : undefined}
-                                        >
-                                            <td className="px-3 py-2 whitespace-nowrap">{format(row.ts)}</td>
-                                            <td className="px-3 py-2">{format(row.lat)}</td>
-                                            <td className="px-3 py-2">{format(row.lng)}</td>
-                                            <td className="px-3 py-2">{format(row.speed_kmh)}</td>
-                                            <td className="px-3 py-2">{format(row.current_a)}</td>
-                                            <td className="px-3 py-2">{format(row.voltage_v)}</td>
-                                            <td className="px-3 py-2">{format(row.rpm_motor)}</td>
-                                            <td className="px-3 py-2">{format(row.rpm_wheel)}</td>
-                                            <td className="px-3 py-2">{format(row.acc_x)}</td>
-                                            <td className="px-3 py-2">{format(row.acc_y)}</td>
-                                            <td className="px-3 py-2">{format(row.acc_z)}</td>
-                                            <td className="px-3 py-2">{format(row.gyro_x)}</td>
-                                            <td className="px-3 py-2">{format(row.gyro_y)}</td>
-                                            <td className="px-3 py-2">{format(row.gyro_z)}</td>
-                                            <td className="px-3 py-2">{format(row.suhu_esc)}</td>
-                                            <td className="px-3 py-2">{format(row.suhu_baterai)}</td>
-                                            <td className="px-3 py-2">{format(row.suhu_motor)}</td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
+                    {/* ESC Temp Card */}
+                    <div className="col-span-1">
+                        <StatCard title="ESC Temp" value={escTemp} unit="°C" trend={escTempHistory as number[]} accent="red" />
+                    </div>
+                </div>
+
+                {/* Second Row: Map spanning full width */}
+                <div className="flex min-h-0 flex-1 flex-col rounded-xl border border-neutral-800 bg-neutral-950/70 p-2">
+                    <div className="min-h-0 flex-1">
+                        <LiveMap lat={lat} lng={lng} follow height="100%" className="h-full overflow-hidden rounded-lg" />
                     </div>
                 </div>
             </div>
-        </div>
+        </AppShell>
     );
 }
 
-export const Logo = () => {
-    return (
-        <a
-            href="#"
-            className="relative z-20 flex items-center space-x-2 py-1 text-sm font-normal text-black"
-        >
-            <div className="h-5 w-6 shrink-0 rounded-tl-lg rounded-tr-sm rounded-br-lg rounded-bl-sm bg-black dark:bg-white" />
-            <motion.span
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="font-medium whitespace-pre text-black dark:text-white"
-            >
-                KUKANG EV ITERA
-            </motion.span>
-        </a>
-    );
-};
-
-export const LogoIcon = () => {
-    return (
-        <a
-            href="#"
-            className="relative z-20 flex items-center space-x-2 py-1 text-sm font-normal text-black"
-        >
-            <div className="h-5 w-6 shrink-0 rounded-tl-lg rounded-tr-sm rounded-br-lg rounded-bl-sm bg-black dark:bg-white" />
-        </a>
-    );
-};
+// Sidebar branding moved to AppShell for a unified layout
