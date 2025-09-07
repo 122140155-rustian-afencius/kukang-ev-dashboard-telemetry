@@ -1,9 +1,9 @@
 'use client';
 
-import { ShimmerButton } from '@/components/magicui/shimmer-button';
+import { RetroGrid } from '@/components/magicui/retro-grid';
 import { ShineBorder } from '@/components/magicui/shine-border';
 import { ModeToggle } from '@/components/mode-toggle';
-import { RetroGrid } from '@/components/magicui/retro-grid';
+import { HoverBorderGradient } from '@/components/ui/hover-border-gradient';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { TextShimmer } from '@/components/ui/text-shimmer';
@@ -14,6 +14,15 @@ export default function Login() {
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         console.log('Form submitted');
+    };
+
+    const handleLoginClick = (e: React.MouseEvent<HTMLElement>) => {
+        e.preventDefault();
+        const form = e.currentTarget.closest('form');
+        if (form) {
+            const formEvent = new Event('submit', { bubbles: true, cancelable: true });
+            form.dispatchEvent(formEvent);
+        }
     };
     return (
         <div className="flex min-h-screen items-center justify-center px-4 sm:px-6">
@@ -30,7 +39,7 @@ export default function Login() {
                         KUKANG EV ITERA
                     </TextShimmer>
                 </h2>
-                <p className="mt-4 max-w-sm text-center text-xs sm:mt-6 sm:text-sm text-neutral-600 dark:text-neutral-300">
+                <p className="mt-4 max-w-sm text-center text-xs text-neutral-600 sm:mt-6 sm:text-sm dark:text-neutral-300">
                     Enter your email and password to get access to the telemetry dashboard
                 </p>
                 <form className="my-8" onSubmit={handleSubmit}>
@@ -42,9 +51,15 @@ export default function Login() {
                         <Label htmlFor="password">Password</Label>
                         <Input id="password" placeholder="••••••••" type="password" autoComplete="current-password" />
                     </LabelInputContainer>
-                    <ShimmerButton className="w-full font-medium" type="submit" shimmerColor="#DC143C" borderRadius="15px">
-                        Login
-                    </ShimmerButton>
+                    <div className="flex justify-center">
+                        <HoverBorderGradient
+                            containerClassName="w-full"
+                            className="w-full bg-gradient-to-br from-black to-neutral-600 font-medium text-white dark:bg-zinc-800 dark:from-zinc-900 dark:to-zinc-900"
+                            onClick={handleLoginClick}
+                        >
+                            Login &rarr;
+                        </HoverBorderGradient>
+                    </div>
                 </form>
             </div>
             <RetroGrid className="opacity-40 sm:opacity-60 md:opacity-80" darkLineColor="#DC143C" />
