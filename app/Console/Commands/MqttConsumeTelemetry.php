@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Events\TelemetryUpdated;
+use App\Services\TelemetryStatusService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
@@ -15,6 +16,15 @@ class MqttConsumeTelemetry extends Command
 {
     protected $signature = 'mqtt:telemetry';
     protected $description = 'Consume telemetry messages from MQTT broker';
+
+    protected TelemetryStatusService $statusService;
+
+    public function __construct(TelemetryStatusService $statusService)
+    {
+        parent::__construct();
+        $this->statusService = $statusService;
+    }
+
     public function handle(): int
     {
         $topic = rtrim((string) config('telemetry.topic_base', 'kukang/telemetry'), '/#');
@@ -65,6 +75,9 @@ class MqttConsumeTelemetry extends Command
                         ]);
 
                         $this->line("✓ Telemetry data received and saved: {$data['ts']}");
+
+                        // Update status service with new data
+                        $this->statusService->updateLastDataTime();
 
                         $broadcastPayload = [
                             'ts' => $data['ts'],

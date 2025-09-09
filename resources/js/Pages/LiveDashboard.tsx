@@ -13,6 +13,60 @@ interface Connection {
 export default function LiveDashboard() {
     const [rows, setRows] = useState<TelemetryPoint[]>([]);
     const [connected, setConnected] = useState(false);
+    const [dataActive, setDataActive] = useState(false);
+    const [lastDataTime, setLastDataTime] = useState<string | null>(null);
+
+    // Check for data timeout every second
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (lastDataTime) {
+                const now = new Date();
+                const lastTime = new Date(lastDataTime);
+                const diffSeconds = (now.getTime() - lastTime.getTime()) / 1000;
+                setDataActive(diffSeconds <= 5); // 5 second timeout
+            } else {
+                setDataActive(false);
+            }
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [lastDataTime]);
+
+    // Listen to telemetry status updates
+    useEffect(() => {
+        const statusChannel = window.Echo.channel('telemetry.status');
+        const statusHandler = (e: unknown) => {
+            const payload = e as Record<string, unknown>;
+            if (payload.status === 'active') {
+                setDataActive(true);
+                setLastDataTime(payload.last_data_time as string);
+            } else {
+                setDataActive(false);
+            }
+        };
+
+        statusChannel.listen('TelemetryStatusUpdated', statusHandler);
+        statusChannel.listen('App\\Events\\TelemetryStatusUpdated', statusHandler as unknown as () => void);
+
+        return () => {
+            statusChannel.stopListening('TelemetryStatusUpdated');
+            statusChannel.stopListening('App\\Events\\TelemetryStatusUpdated');
+            window.Echo.leave('telemetry.status');
+        };
+    }, []);
+
+    // Initial status check
+    useEffect(() => {
+        fetch('/api/telemetry/status')
+            .then((response) => response.json())
+            .then((data) => {
+                setDataActive(data.is_active);
+                if (data.last_data_time) {
+                    setLastDataTime(data.last_data_time);
+                }
+            })
+            .catch(console.error);
+    }, []);
 
     useEffect(() => {
         const connection = (
@@ -92,6 +146,10 @@ export default function LiveDashboard() {
                         ? ((payload.gyro as Record<string, unknown>).z as number)
                         : null),
             };
+
+            // Update last data time when new telemetry data is received
+            setLastDataTime(new Date().toISOString());
+
             setRows((prev) => {
                 const next = [row, ...prev];
                 const MAX = 1000;
@@ -106,7 +164,6 @@ export default function LiveDashboard() {
             window.Echo.leave('telemetry.kukang');
         };
     }, []);
-
     const latest = rows[0];
     const speed = Number.isFinite(latest?.speed_kmh) ? (latest!.speed_kmh as number) : 0;
     const current = Number.isFinite(latest?.current_a) ? (latest!.current_a as number) : 0;
@@ -132,54 +189,50 @@ export default function LiveDashboard() {
         [rows],
     );
 
-    const format = (value: unknown) => {
-        if (value === null || value === undefined) return '-';
-        if (typeof value === 'number') {
-            if (Number.isNaN(value)) return '-';
-            return Number.isInteger(value) ? value : (value as number).toFixed(2);
-        }
-        return String(value);
-    };
-
     return (
         <AppShell>
-            <div className="flex h-screen w-full flex-1 flex-col gap-3 overflow-hidden rounded-tl-2xl border border-neutral-200 bg-white p-3 dark:border-neutral-700 dark:bg-neutral-900">
-                {/* Header */}
-                <div className="flex flex-shrink-0 items-center justify-between">
-                    <h1 className="text-lg font-semibold">Live Telemetry</h1>
-                    <div className="flex items-center gap-2">
-                        <span className={`rounded px-2 py-1 text-xs ${connected ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
-                            {connected ? 'Connected' : 'Disconnected'}
-                        </span>
-                        <button onClick={() => setRows([])} className="rounded border px-2 py-1 text-xs hover:bg-secondary" title="Clear rows">
-                            Clear
-                        </button>
+            <div className="flex h-screen w-full flex-1 flex-col gap-2 overflow-hidden rounded-tl-2xl border border-neutral-200 bg-white p-2 sm:gap-3 sm:p-3 dark:border-neutral-700 dark:bg-neutral-900">
+                <div className="dark:to-neutral-850 flex flex-shrink-0 flex-col gap-3 rounded-xl border border-neutral-300 bg-gradient-to-r from-slate-50 to-slate-100 p-4 dark:border-neutral-700 dark:from-neutral-800">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 flex-shrink-0">
+                                <img src="/logo-kukang.png" alt="KUKANG Logo" className="h-full w-full object-contain" />
+                            </div>
+                            <div>
+                                <h1 className="text-lg font-bold text-gray-800 dark:text-white">IKU PROTO 3.0 TELEMETRY</h1>
+                                <p className="text-sm text-gray-600 dark:text-gray-300">Real-time Vehicle Monitoring System</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="flex flex-col items-end">
+                                <span className="text-xs font-medium text-gray-500 dark:text-gray-400">DATA STREAM</span>
+                                <span className={`text-sm font-bold ${connected && dataActive ? 'text-green-600' : 'text-red-600'}`}>
+                                    {connected && dataActive ? 'LIVE' : 'OFFLINE'}
+                                </span>
+                            </div>
+                            <div className={`h-3 w-3 rounded-full ${connected && dataActive ? 'animate-pulse bg-green-500' : 'bg-red-500'}`}></div>
+                        </div>
                     </div>
                 </div>
 
-                {/* First Row: 3 columns - Current, Speed (center), ESC Temp */}
-                <div className="grid flex-shrink-0 grid-cols-3 gap-4" style={{ height: '35vh' }}>
-                    {/* Current Card */}
-                    <div className="col-span-1">
-                        <StatCard title="Current" value={current} unit="A" trend={currentHistory as number[]} accent="blue" />
-                    </div>
-
-                    {/* Speed Gauge (Center) */}
-                    <div className="col-span-1 flex flex-col rounded-xl border border-neutral-800 bg-neutral-950/70">
-                        <div className="flex flex-1 items-center justify-center">
+                <div className="flex flex-shrink-0 flex-col gap-2 sm:gap-4 lg:grid lg:grid-cols-3">
+                    <div className="order-1 flex flex-col rounded-xl border border-neutral-800 bg-neutral-950/70 lg:order-2 lg:col-span-1">
+                        <div className="flex min-h-[180px] flex-1 items-center justify-center p-2 lg:min-h-[250px]">
                             <SpeedGauge value={speed} />
                         </div>
                     </div>
 
-                    {/* ESC Temp Card */}
-                    <div className="col-span-1">
+                    <div className="order-2 lg:order-1 lg:col-span-1">
+                        <StatCard title="Current" value={current} unit="A" trend={currentHistory as number[]} accent="blue" />
+                    </div>
+
+                    <div className="order-3 lg:order-3 lg:col-span-1">
                         <StatCard title="ESC Temp" value={escTemp} unit="°C" trend={escTempHistory as number[]} accent="red" />
                     </div>
                 </div>
 
-                {/* Second Row: Map spanning full width */}
-                <div className="flex min-h-0 flex-1 flex-col rounded-xl border border-neutral-800 bg-neutral-950/70 p-2">
-                    <div className="min-h-0 flex-1">
+                <div className="flex min-h-0 flex-1 flex-col rounded-xl border border-neutral-800 bg-neutral-950/70 p-1 sm:p-2">
+                    <div className="min-h-[250px] flex-1 md:min-h-[300px]">
                         <LiveMap lat={lat} lng={lng} follow height="100%" className="h-full overflow-hidden rounded-lg" />
                     </div>
                 </div>
@@ -187,5 +240,3 @@ export default function LiveDashboard() {
         </AppShell>
     );
 }
-
-// Sidebar branding moved to AppShell for a unified layout

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\TelemetryStatusService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -9,6 +10,13 @@ use Inertia\Inertia;
 
 class TelemetryController extends Controller
 {
+    protected TelemetryStatusService $statusService;
+
+    public function __construct(TelemetryStatusService $statusService)
+    {
+        $this->statusService = $statusService;
+    }
+
     public function live()
     {
         return Inertia::render('LiveDashboard');
@@ -83,7 +91,7 @@ class TelemetryController extends Controller
                 ->limit(100000)
                 ->get();
         } else {
-            $table = 'telemetry_'.$resolution;
+            $table = 'telemetry_' . $resolution;
             $points = DB::table($table)
                 ->select([
                     'bucket as t',
@@ -109,5 +117,10 @@ class TelemetryController extends Controller
     {
         // Client will fetch history via /api/telemetry/history; render the page shell
         return Inertia::render('Telemetry/History');
+    }
+
+    public function status()
+    {
+        return response()->json($this->statusService->getStatus());
     }
 }

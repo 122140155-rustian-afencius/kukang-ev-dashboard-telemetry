@@ -18,7 +18,7 @@ export default function SpeedGauge({ value, max = 40, unit = 'km/h', title = 'Sp
                 min: 0,
                 max,
                 splitNumber: 8,
-                radius: '85%',
+                radius: '75%', // Reduced from 85% for better mobile spacing
                 axisLine: {
                     roundCap: false,
                     lineStyle: {
@@ -60,7 +60,7 @@ export default function SpeedGauge({ value, max = 40, unit = 'km/h', title = 'Sp
                     show: true,
                     distance: 5,
                     color: '#9CA3AF',
-                    fontSize: 17,
+                    fontSize: 14, // Reduced from 17 for mobile
                     fontStyle: 'italic' as const,
                     fontWeight: 600,
                     fontFamily: '"JetBrains Mono", "Fira Code", "SF Mono", "Monaco", "Consolas", monospace',
@@ -80,7 +80,7 @@ export default function SpeedGauge({ value, max = 40, unit = 'km/h', title = 'Sp
                     show: true,
                     offsetCenter: [0, '75%'],
                     color: '#9CA3AF',
-                    fontSize: 14,
+                    fontSize: 12, // Reduced from 14 for mobile
                     fontWeight: 500,
                     fontFamily: '"Inter", "SF Pro Display", "Segoe UI", sans-serif',
                     textBorderWidth: 0,
@@ -89,7 +89,7 @@ export default function SpeedGauge({ value, max = 40, unit = 'km/h', title = 'Sp
                     valueAnimation: true,
                     formatter: (val: number) => `${Math.round(val)}`,
                     color: '#F9FAFB',
-                    fontSize: 25,
+                    fontSize: 22, // Reduced from 25 for mobile
                     fontWeight: 200,
                     offsetCenter: [0, '20%'],
                 },
@@ -102,7 +102,7 @@ export default function SpeedGauge({ value, max = 40, unit = 'km/h', title = 'Sp
                 endAngle: -20,
                 min: 0,
                 max,
-                radius: '85%',
+                radius: '75%', // Reduced from 85% for better mobile spacing
                 axisLine: { show: false },
                 pointer: { show: false },
                 axisTick: { show: false },
@@ -113,7 +113,7 @@ export default function SpeedGauge({ value, max = 40, unit = 'km/h', title = 'Sp
                 detail: {
                     formatter: () => unit,
                     color: '#9CA3AF',
-                    fontSize: 14,
+                    fontSize: 12, // Reduced from 14 for mobile
                     fontWeight: 300,
                     offsetCenter: [0, '45%'],
                 },
@@ -122,5 +122,5 @@ export default function SpeedGauge({ value, max = 40, unit = 'km/h', title = 'Sp
         ],
     };
 
-    return <EChartBase option={option} height={220} />;
+    return <EChartBase option={option} height={180} />; // Reduced from 220 for better mobile fit
 }
