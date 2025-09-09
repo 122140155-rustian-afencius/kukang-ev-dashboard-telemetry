@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Events\TelemetryStatusUpdated;
@@ -9,8 +11,6 @@ use Carbon\Carbon;
 
 class TelemetryStatusService
 {
-    private const CACHE_KEY = 'telemetry.last_data_time';
-    private const TIMEOUT_SECONDS = 5; // 5 seconds timeout
     private const STATUS_ACTIVE = 'active';
     private const STATUS_INACTIVE = 'inactive';
 
@@ -20,7 +20,8 @@ class TelemetryStatusService
     public function updateLastDataTime(): void
     {
         $now = now();
-        Cache::put(self::CACHE_KEY, $now->toISOString(), 3600); // Cache for 1 hour
+        $cacheKey = (string) config('telemetry.status_cache_key', 'telemetry.last_data_time');
+        Cache::put($cacheKey, $now->toISOString(), 3600); // Cache for 1 hour
 
         Log::debug('Telemetry last data time updated', [
             'timestamp' => $now->toISOString()
@@ -35,7 +36,8 @@ class TelemetryStatusService
      */
     public function isActive(): bool
     {
-        $lastDataTime = Cache::get(self::CACHE_KEY);
+        $cacheKey = (string) config('telemetry.status_cache_key', 'telemetry.last_data_time');
+        $lastDataTime = Cache::get($cacheKey);
 
         if (!$lastDataTime) {
             return false;
@@ -44,7 +46,8 @@ class TelemetryStatusService
         $lastTime = Carbon::parse($lastDataTime);
         $secondsSinceLastData = now()->diffInSeconds($lastTime);
 
-        return $secondsSinceLastData <= self::TIMEOUT_SECONDS;
+        $timeout = (int) config('telemetry.status_timeout_seconds', 5);
+        return $secondsSinceLastData <= $timeout;
     }
 
     /**
@@ -52,7 +55,8 @@ class TelemetryStatusService
      */
     public function getStatus(): array
     {
-        $lastDataTime = Cache::get(self::CACHE_KEY);
+        $cacheKey = (string) config('telemetry.status_cache_key', 'telemetry.last_data_time');
+        $lastDataTime = Cache::get($cacheKey);
         $isActive = $this->isActive();
 
         return [
@@ -68,17 +72,18 @@ class TelemetryStatusService
     public function checkTimeout(): void
     {
         $status = $this->getStatus();
+        $timeout = (int) config('telemetry.status_timeout_seconds', 5);
 
         if (!$status['is_active'] && $status['last_data_time']) {
             Log::info('Telemetry timeout detected', [
                 'last_data_time' => $status['last_data_time'],
-                'timeout_seconds' => self::TIMEOUT_SECONDS
+                'timeout_seconds' => $timeout,
             ]);
 
             // Broadcast inactive status
             event(new TelemetryStatusUpdated(
                 self::STATUS_INACTIVE,
-                $status['last_data_time']
+                (string) $status['last_data_time']
             ));
         }
     }
