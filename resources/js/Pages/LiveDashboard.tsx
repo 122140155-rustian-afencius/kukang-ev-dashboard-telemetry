@@ -16,14 +16,13 @@ export default function LiveDashboard() {
     const [dataActive, setDataActive] = useState(false);
     const [lastDataTime, setLastDataTime] = useState<string | null>(null);
 
-    // Check for data timeout every second
     useEffect(() => {
         const interval = setInterval(() => {
             if (lastDataTime) {
                 const now = new Date();
                 const lastTime = new Date(lastDataTime);
                 const diffSeconds = (now.getTime() - lastTime.getTime()) / 1000;
-                setDataActive(diffSeconds <= 5); // 5 second timeout
+                setDataActive(diffSeconds <= 5);
             } else {
                 setDataActive(false);
             }
@@ -32,7 +31,6 @@ export default function LiveDashboard() {
         return () => clearInterval(interval);
     }, [lastDataTime]);
 
-    // Listen to telemetry status updates
     useEffect(() => {
         const statusChannel = window.Echo.channel('telemetry.status');
         const statusHandler = (e: unknown) => {
@@ -55,7 +53,6 @@ export default function LiveDashboard() {
         };
     }, []);
 
-    // Initial status check
     useEffect(() => {
         fetch('/api/telemetry/status')
             .then((response) => response.json())
@@ -215,18 +212,18 @@ export default function LiveDashboard() {
                     </div>
                 </div>
 
-                <div className="flex flex-shrink-0 flex-col gap-2 sm:gap-4 lg:grid lg:grid-cols-3">
-                    <div className="order-1 flex flex-col rounded-xl border border-neutral-800 bg-neutral-950/70 lg:order-2 lg:col-span-1">
-                        <div className="flex min-h-[180px] flex-1 items-center justify-center p-2 lg:min-h-[250px]">
+                <div className="flex flex-shrink-0 flex-col gap-2 sm:gap-4 lg:grid lg:grid-cols-8">
+                    <div className="order-1 flex flex-col rounded-xl border border-neutral-800 bg-neutral-950/70 lg:order-2 lg:col-span-2">
+                        <div className="-mb-13 flex min-h-[120px] flex-1 items-center justify-center p-1 sm:min-h-[140px]">
                             <SpeedGauge value={speed} />
                         </div>
                     </div>
 
-                    <div className="order-2 lg:order-1 lg:col-span-1">
+                    <div className="order-2 lg:order-1 lg:col-span-3">
                         <StatCard title="Current" value={current} unit="A" trend={currentHistory as number[]} accent="blue" />
                     </div>
 
-                    <div className="order-3 lg:order-3 lg:col-span-1">
+                    <div className="order-3 lg:order-3 lg:col-span-3">
                         <StatCard title="ESC Temp" value={escTemp} unit="°C" trend={escTempHistory as number[]} accent="red" />
                     </div>
                 </div>
