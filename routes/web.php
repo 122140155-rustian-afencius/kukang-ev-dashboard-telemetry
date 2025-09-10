@@ -1,24 +1,30 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TelemetryController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/login', function () {
-    return Inertia::render('Auth/Login');
-})->name('login');
+// Root: send authenticated users to /dashboard, guests to /login
+Route::get('/', function () {
+    return auth()->check() ? redirect()->route('dashboard') : redirect()->route('login');
+})->name('root');
 
-// Redirect /telemetry to the dashboard to keep one unified layout
-Route::get('telemetry', function () {
-    return redirect()->route('live');
-})->name('telemetry.overview');
-Route::get('live', [TelemetryController::class, 'live'])->name('live');
-Route::get('history', [TelemetryController::class, 'history'])->name('history');
-// Route::middleware(['auth'])->group(function () {
-//     Route::redirect('/', '/live');
-//     Route::get('/live', [TelemetryController::class, 'live'])->name('live');
-//     Route::get('/history', [TelemetryController::class, 'history'])->name('history');
-// });
+// Guest-only routes
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'create'])->name('login');
+    Route::post('/login', [AuthController::class, 'store'])->name('login.store');
+});
+
+// Authenticated routes
+Route::middleware('auth')->group(function () {
+    // Redirect /telemetry to the dashboard to keep one unified layout
+    Route::get('telemetry', fn () => redirect()->route('dashboard'))->name('telemetry.overview');
+    Route::get('dashboard', [TelemetryController::class, 'live'])->name('dashboard');
+    Route::get('history', [TelemetryController::class, 'history'])->name('history');
+
+    Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
+});
 
 Route::fallback(function () {
     return Inertia::render('NotFound');

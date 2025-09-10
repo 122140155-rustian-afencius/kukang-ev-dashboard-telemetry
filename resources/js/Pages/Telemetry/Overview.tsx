@@ -31,7 +31,6 @@ export default function Overview() {
   const currentHistory = useMemo(() => t.current_history ?? [], [t.current_history]);
   const escTempHistory = useMemo(() => t.suhu_esc_history ?? [], [t.suhu_esc_history]);
 
-  // Optional: derive a dynamic max speed for nicer gauge scaling
   const [maxSpeed, setMaxSpeed] = useState(200);
   useEffect(() => {
     const target = Math.max(60, Math.ceil(Math.max(speed, 120) / 20) * 20);
@@ -44,7 +43,7 @@ export default function Overview() {
       { label: 'Map', href: '#map', icon: <IconMap className="h-5 w-5 text-neutral-200" /> },
       { label: 'Current', href: '#current', icon: <IconBolt className="h-5 w-5 text-neutral-200" /> },
       { label: 'ESC Temp', href: '#esc-temp', icon: <IconTemperature className="h-5 w-5 text-neutral-200" /> },
-      { label: 'Back', href: '/live', icon: <IconChevronLeft className="h-5 w-5 text-neutral-200" /> },
+      { label: 'Back', href: '/dashboard', icon: <IconChevronLeft className="h-5 w-5 text-neutral-200" /> },
     ],
     []
   );
@@ -72,7 +71,7 @@ export default function Overview() {
               <h1 className="text-xl font-semibold tracking-tight text-neutral-100">KUKANG EV — Live Telemetry</h1>
               <p className="text-xs text-neutral-400">Racing mode • Dark • ECharts</p>
             </div>
-            <Link href="/live" className="text-xs text-neutral-400 underline">Go to Live Table</Link>
+            <Link href="/dashboard" className="text-xs text-neutral-400 underline">Go to Live Table</Link>
           </div>
 
           {/* Top Grid: Speed + KPIs */}
@@ -117,4 +116,3 @@ const Logo = () => (
     </motion.span>
   </a>
 );
-

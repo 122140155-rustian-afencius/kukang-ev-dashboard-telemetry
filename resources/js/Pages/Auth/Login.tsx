@@ -9,20 +9,30 @@ import { Label } from '@/components/ui/label';
 import { TextShimmer } from '@/components/ui/text-shimmer';
 import { cn } from '@/lib/utils';
 import React from 'react';
+import { useForm } from '@inertiajs/react';
+import { useEffect } from 'react';
 
 export default function Login() {
+    const { data, setData, post, processing, errors, reset } = useForm({
+        email: '',
+        password: '',
+        _token: '',
+    });
+
+    useEffect(() => {
+        const meta = document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement | null;
+        if (meta?.content) {
+            setData('_token', meta.content);
+        }
+    }, [setData]);
+
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        console.log('Form submitted');
-    };
-
-    const handleLoginClick = (e: React.MouseEvent<HTMLElement>) => {
-        e.preventDefault();
-        const form = e.currentTarget.closest('form');
-        if (form) {
-            const formEvent = new Event('submit', { bubbles: true, cancelable: true });
-            form.dispatchEvent(formEvent);
-        }
+        post('/login', {
+            onSuccess: () => {
+                reset('password');
+            },
+        });
     };
     return (
         <div className="flex min-h-screen items-center justify-center px-3 py-6 sm:px-6 lg:px-8">
@@ -49,19 +59,43 @@ export default function Login() {
                 <form className="my-8" onSubmit={handleSubmit}>
                     <LabelInputContainer className="mb-4">
                         <Label htmlFor="email">Email Address</Label>
-                        <Input id="email" placeholder="ikuproto@kukangev.com" type="email" autoComplete="email" />
+                        <Input
+                            id="email"
+                            name="email"
+                            placeholder="ikuproto@kukangev.com"
+                            type="email"
+                            autoComplete="email"
+                            value={data.email}
+                            onChange={(e) => setData('email', e.target.value)}
+                        />
+                        {errors.email && (
+                            <p className="mt-1 text-xs text-red-500">{errors.email}</p>
+                        )}
                     </LabelInputContainer>
                     <LabelInputContainer className="mb-8">
                         <Label htmlFor="password">Password</Label>
-                        <Input id="password" placeholder="••••••••" type="password" autoComplete="current-password" />
+                        <Input
+                            id="password"
+                            name="password"
+                            placeholder="••••••••"
+                            type="password"
+                            autoComplete="current-password"
+                            value={data.password}
+                            onChange={(e) => setData('password', e.target.value)}
+                        />
+                        {errors.password && (
+                            <p className="mt-1 text-xs text-red-500">{errors.password}</p>
+                        )}
                     </LabelInputContainer>
                     <div className="flex justify-center">
                         <HoverBorderGradient
+                            as="button"
+                            type="submit"
+                            disabled={processing}
                             containerClassName="w-full"
-                            className="w-full bg-gradient-to-br from-black to-neutral-600 font-medium text-white dark:bg-zinc-800 dark:from-zinc-900 dark:to-zinc-900"
-                            onClick={handleLoginClick}
+                            className="w-full bg-gradient-to-br from-black to-neutral-600 font-medium text-white disabled:opacity-60 dark:bg-zinc-800 dark:from-zinc-900 dark:to-zinc-900"
                         >
-                            Login &rarr;
+                            {processing ? 'Signing in…' : 'Login →'}
                         </HoverBorderGradient>
                     </div>
                 </form>

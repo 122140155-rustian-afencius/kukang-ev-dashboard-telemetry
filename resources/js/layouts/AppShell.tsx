@@ -1,5 +1,6 @@
 import { Sidebar, SidebarBody, SidebarLink } from '@/components/ui/sidebar';
-import { IconGauge, IconHistory, IconSettings, IconUserBolt } from '@tabler/icons-react';
+import { Link } from '@inertiajs/react';
+import { IconGauge, IconHistory, IconSettings, IconUserBolt, IconLogout } from '@tabler/icons-react';
 import { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 
@@ -11,7 +12,7 @@ export default function AppShell({ children }: Props) {
   const [open, setOpen] = useState(false);
   const links = useMemo(
     () => [
-      { label: 'Dashboard', href: '/live', icon: <IconGauge className="h-5 w-5 shrink-0 text-neutral-200" /> },
+      { label: 'Dashboard', href: '/dashboard', icon: <IconGauge className="h-5 w-5 shrink-0 text-neutral-200" /> },
       { label: 'History', href: '/history', icon: <IconHistory className="h-5 w-5 shrink-0 text-neutral-200" /> },
       { label: 'Profile', href: '#', icon: <IconUserBolt className="h-5 w-5 shrink-0 text-neutral-200" /> },
       { label: 'Settings', href: '#', icon: <IconSettings className="h-5 w-5 shrink-0 text-neutral-200" /> },
@@ -31,7 +32,7 @@ export default function AppShell({ children }: Props) {
               ))}
             </div>
           </div>
-          <div>
+          <div className="flex w-full items-center justify-between gap-2">
             <SidebarLink
               link={{
                 label: 'Technical Manager',
@@ -47,6 +48,16 @@ export default function AppShell({ children }: Props) {
                 ),
               }}
             />
+            <Link
+              href="/logout"
+              method="post"
+              as="button"
+              aria-label="Logout"
+              title="Logout"
+              className="ml-auto rounded-md p-1.5 text-neutral-600 hover:bg-neutral-200 dark:text-neutral-200 dark:hover:bg-neutral-700"
+            >
+              <IconLogout className="h-5 w-5" />
+            </Link>
           </div>
         </SidebarBody>
       </Sidebar>
