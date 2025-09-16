@@ -21,7 +21,7 @@ class MqttPublishTelemetry extends Command
     public function handle(): int
     {
         $baseTopic = (string) ($this->option('topic') ?? config('telemetry.topic_base', 'kukang/telemetry'));
-        $interval  = min(1, (int) $this->option('interval'));
+        $interval  = max(1, (int) $this->option('interval'));
         $count     = $this->option('count') !== null ? max(1, (int) $this->option('count')) : null;
 
         // Normalize base topic, remove trailing "/" or "/#"
@@ -51,7 +51,7 @@ class MqttPublishTelemetry extends Command
             } catch (MqttClientException $e) {
                 Log::error('MQTT publish failed', ['error' => $e->getMessage()]);
                 $this->error('MQTT publish failed: ' . $e->getMessage());
-                sleep(3);
+                sleep(1);
             } catch (\Throwable $e) {
                 Log::warning('Unexpected error while publishing telemetry', ['error' => $e->getMessage()]);
                 $this->warn('Unexpected error: ' . $e->getMessage());
@@ -89,25 +89,10 @@ class MqttPublishTelemetry extends Command
         return [
             'ts' => $now,
             'suhu_esc' => round($suhuEsc, 2),
-            'suhu_baterai' => round($suhuBaterai, 2),
-            'suhu_motor' => round($suhuMotor, 2),
             'arus' => round($arus, 2),
-            'tegangan' => round($tegangan, 2),
             'lat' => round($lat, 6),
             'lng' => round($lng, 6),
             'kecepatan' => round($kecepatan, 2),
-            'rpm_motor' => $rpmMotor,
-            'rpm_wheel' => $rpmwheel,
-            'accel' => [
-                'x' => $this->randFloat(-2, 2),
-                'y' => $this->randFloat(-2, 2),
-                'z' => $this->randFloat(8, 12), // include gravity on Z
-            ],
-            'gyro' => [
-                'x' => $this->randFloat(-180, 180),
-                'y' => $this->randFloat(-180, 180),
-                'z' => $this->randFloat(-180, 180),
-            ],
         ];
     }
 
