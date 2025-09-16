@@ -61,14 +61,13 @@ class MqttConsumeTelemetry extends Command
 
                         $this->line("✓ Telemetry data received and saved: {$dto->ts->toIso8601ZuluString()}");
 
-                        // Update status via action
-                        $this->upsertStatus->handle();
+                       $this->upsertStatus->handle();
 
                         event(new TelemetryUpdated($dto->toBroadcastPayload()));
                     } catch (\Throwable $e) {
                         Log::warning('Failed to process telemetry message', ['error' => $e->getMessage()]);
                     }
-                }, 1);
+                }, 0);
 
                 $client->loop(true);
             } catch (MqttClientException $e) {

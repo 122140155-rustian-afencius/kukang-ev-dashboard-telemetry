@@ -72,8 +72,8 @@ return [
                     'client_certificate_key_passphrase' => env('MQTT_TLS_CLIENT_CERT_KEY_PASSPHRASE'),
                 ],
                 'auth' => [
-                    'username' => env('MQTT_AUTH_USERNAME'),
-                    'password' => env('MQTT_AUTH_PASSWORD'),
+                    'username' => 'kukangev',
+                    'password' => 'KukangEv3',
                 ],
                 'last_will' => [
                     'topic' => env('MQTT_LAST_WILL_TOPIC'),
@@ -114,8 +114,8 @@ return [
                     'client_certificate_key_passphrase' => env('MQTT_TLS_CLIENT_CERT_KEY_PASSPHRASE'),
                 ],
                 'auth' => [
-                    'username' => env('MQTT_AUTH_USERNAME'),
-                    'password' => env('MQTT_AUTH_PASSWORD'),
+                    'username' => 'kukang-ev-2',
+                    'password' => 'KukangEv3',
                 ],
                 'last_will' => [
                     'topic' => env('MQTT_LAST_WILL_TOPIC'),

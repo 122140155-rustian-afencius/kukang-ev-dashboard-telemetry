@@ -21,7 +21,7 @@ class MqttPublishTelemetry extends Command
     public function handle(): int
     {
         $baseTopic = (string) ($this->option('topic') ?? config('telemetry.topic_base', 'kukang/telemetry'));
-        $interval  = max(1, (int) $this->option('interval'));
+        $interval  = min(1, (int) $this->option('interval'));
         $count     = $this->option('count') !== null ? max(1, (int) $this->option('count')) : null;
 
         // Normalize base topic, remove trailing "/" or "/#"
@@ -38,7 +38,7 @@ class MqttPublishTelemetry extends Command
                 // Build payload matching MqttConsumeTelemetry expected structure
                 $payload = $this->makePayload();
 
-                $client->publish($topic, json_encode($payload, JSON_THROW_ON_ERROR), 1, false);
+                $client->publish($topic, json_encode($payload, JSON_THROW_ON_ERROR), 0, false);
 
                 $this->line('Published: ' . $payload['ts']);
 
@@ -47,7 +47,7 @@ class MqttPublishTelemetry extends Command
                     break;
                 }
 
-                sleep($interval);
+                sleep(0.5);
             } catch (MqttClientException $e) {
                 Log::error('MQTT publish failed', ['error' => $e->getMessage()]);
                 $this->error('MQTT publish failed: ' . $e->getMessage());
