@@ -189,25 +189,27 @@ export default function LiveDashboard() {
     return (
         <AppShell>
             <div className="flex h-screen w-full flex-1 flex-col gap-2 overflow-hidden rounded-tl-2xl border border-neutral-200 bg-white p-2 sm:gap-3 sm:p-3 dark:border-neutral-700 dark:bg-neutral-900">
-                <div className="dark:to-neutral-850 flex flex-shrink-0 flex-col gap-3 rounded-xl border border-neutral-300 bg-gradient-to-r from-slate-50 to-slate-100 p-4 dark:border-neutral-700 dark:from-neutral-800">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 flex-shrink-0">
+                <div className="dark:to-neutral-850 flex flex-shrink-0 flex-col gap-3 rounded-xl border border-neutral-300 bg-gradient-to-r from-slate-50 to-slate-100 p-3 sm:p-4 dark:border-neutral-700 dark:from-neutral-800">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex items-center gap-2 sm:gap-3">
+                            <div className="h-8 w-8 flex-shrink-0 sm:h-10 sm:w-10">
                                 <img src="/logo-kukang.png" alt="KUKANG Logo" className="h-full w-full object-contain" />
                             </div>
-                            <div>
-                                <h1 className="text-lg font-bold text-gray-800 dark:text-white">IKU PROTO 3.0 TELEMETRY</h1>
-                                <p className="text-sm text-gray-600 dark:text-gray-300">Real-time Vehicle Monitoring System</p>
+                            <div className="min-w-0 flex-1">
+                                <h1 className="text-base font-bold text-gray-800 sm:text-lg dark:text-white">IKU PROTO 3.0 TELEMETRY</h1>
+                                <p className="text-xs text-gray-600 sm:text-sm dark:text-gray-300">Real-time Vehicle Monitoring System</p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <div className="flex flex-col items-end">
+                        <div className="flex items-center justify-between gap-2 sm:justify-end">
+                            <div className="flex flex-col items-start sm:items-end">
                                 <span className="text-xs font-medium text-gray-500 dark:text-gray-400">DATA STREAM</span>
                                 <span className={`text-sm font-bold ${connected && dataActive ? 'text-green-600' : 'text-red-600'}`}>
                                     {connected && dataActive ? 'LIVE' : 'OFFLINE'}
                                 </span>
                             </div>
-                            <div className={`h-3 w-3 rounded-full ${connected && dataActive ? 'animate-pulse bg-green-500' : 'bg-red-500'}`}></div>
+                            <div
+                                className={`h-3 w-3 flex-shrink-0 rounded-full ${connected && dataActive ? 'animate-pulse bg-green-500' : 'bg-red-500'}`}
+                            ></div>
                         </div>
                     </div>
                 </div>
@@ -228,7 +230,7 @@ export default function LiveDashboard() {
                     </div>
                 </div>
 
-                <div className="flex min-h-0 flex-1 flex-col rounded-xl border border-neutral-800 bg-neutral-950/70 p-1 sm:p-2">
+                <div className="z-20 flex min-h-0 flex-1 flex-col rounded-xl border border-neutral-800 bg-neutral-950/70 p-1 sm:p-2">
                     <div className="min-h-[250px] flex-1 md:min-h-[300px]">
                         <LiveMap lat={lat} lng={lng} follow height="100%" className="h-full overflow-hidden rounded-lg" />
                     </div>
