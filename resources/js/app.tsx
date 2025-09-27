@@ -29,6 +29,7 @@ window.Echo = new Echo({
 });
 
 createInertiaApp({
+    title: (title) => (title ? `${title} - KUKANG EV ITERA` : 'KUKANG EV ITERA'),
     resolve: (name) => resolvePageComponent(`./Pages/${name}.tsx`, import.meta.glob('./Pages/**/*.tsx')),
     setup({ el, App, props }) {
         createRoot(el).render(

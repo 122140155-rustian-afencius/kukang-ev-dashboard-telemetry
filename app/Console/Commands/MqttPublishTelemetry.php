@@ -47,7 +47,7 @@ class MqttPublishTelemetry extends Command
                     break;
                 }
 
-                sleep(0.6);
+                sleep(1);
             } catch (MqttClientException $e) {
                 Log::error('MQTT publish failed', ['error' => $e->getMessage()]);
                 $this->error('MQTT publish failed: ' . $e->getMessage());
