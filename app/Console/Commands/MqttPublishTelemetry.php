@@ -21,10 +21,8 @@ class MqttPublishTelemetry extends Command
     public function handle(): int
     {
         $baseTopic = (string) ($this->option('topic') ?? config('telemetry.topic_base', 'kukang/telemetry'));
-        $interval  = max(1, (int) $this->option('interval'));
-        $count     = $this->option('count') !== null ? max(1, (int) $this->option('count')) : null;
-
-        // Normalize base topic, remove trailing "/" or "/#"
+        $interval = max(1, (int) $this->option('interval'));
+        $count = $this->option('count') !== null ? max(1, (int) $this->option('count')) : null;
         $baseTopic = rtrim($baseTopic, '/#');
         $topic = $baseTopic;
 
@@ -64,6 +62,7 @@ class MqttPublishTelemetry extends Command
 
     /**
      * Create a telemetry payload matching keys used in MqttConsumeTelemetry (no vehicle_id).
+     *
      * @return array<string,mixed>
      */
     protected function makePayload(): array
@@ -71,14 +70,14 @@ class MqttPublishTelemetry extends Command
         // Use deterministic-ish randoms for realism; tweak ranges as needed.
         $now = Carbon::now()->toIso8601String();
 
-        $suhuEsc     = $this->randFloat(25, 70);
+        $suhuEsc = $this->randFloat(25, 70);
         $suhuBaterai = $this->randFloat(25, 55);
-        $suhuMotor   = $this->randFloat(25, 80);
-        $arus        = $this->randFloat(-50, 200); // A
-        $tegangan    = $this->randFloat(40, 80);   // V
-        $kecepatan   = $this->randFloat(0, 120);   // km/h
-        $rpmMotor    = rand(0, 6000);
-        $rpmwheel     = rand(0, 2000);
+        $suhuMotor = $this->randFloat(25, 80);
+        $arus = $this->randFloat(-50, 200); // A
+        $tegangan = $this->randFloat(40, 80);   // V
+        $kecepatan = $this->randFloat(0, 120);   // km/h
+        $rpmMotor = rand(0, 6000);
+        $rpmWheel = rand(0, 2000);
 
         // Simulated GPS around a point (e.g., Jakarta)
         $latBase = -6.200000; // Jakarta approx
@@ -89,10 +88,15 @@ class MqttPublishTelemetry extends Command
         return [
             'ts' => $now,
             'suhu_esc' => round($suhuEsc, 2),
+            'suhu_baterai' => round($suhuBaterai, 2),
+            'suhu_motor' => round($suhuMotor, 2),
             'arus' => round($arus, 2),
+            'tegangan' => round($tegangan, 2),
             'lat' => round($lat, 6),
             'lng' => round($lng, 6),
             'kecepatan' => round($kecepatan, 2),
+            'rpm_motor' => $rpmMotor,
+            'rpm_wheel' => $rpmWheel,
         ];
     }
 

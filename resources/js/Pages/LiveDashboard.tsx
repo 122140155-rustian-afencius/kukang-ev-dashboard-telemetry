@@ -1,4 +1,3 @@
-import LiveMap from '@/components/telemetry/LiveMap';
 import SpeedGauge from '@/components/telemetry/SpeedGauge';
 import StatCard from '@/components/telemetry/StatCard';
 import AppShell from '@/layouts/AppShell';
@@ -165,8 +164,18 @@ export default function LiveDashboard() {
     const speed = Number.isFinite(latest?.speed_kmh) ? (latest!.speed_kmh as number) : 0;
     const current = Number.isFinite(latest?.current_a) ? (latest!.current_a as number) : 0;
     const escTemp = Number.isFinite(latest?.suhu_esc) ? (latest!.suhu_esc as number) : 0;
-    const lat = Number.isFinite(latest?.lat) ? (latest!.lat as number) : 0;
-    const lng = Number.isFinite(latest?.lng) ? (latest!.lng as number) : 0;
+    const battTemp = Number.isFinite(latest?.suhu_baterai) ? (latest!.suhu_baterai as number) : 0;
+    const wheelRpm = Number.isFinite(latest?.rpm_wheel) ? (latest!.rpm_wheel as number) : 0;
+
+    const speedHistory = useMemo(
+        () =>
+            rows
+                .slice(0, 60)
+                .map((r) => r.speed_kmh)
+                .reverse()
+                .filter((v) => Number.isFinite(v)),
+        [rows],
+    );
     const currentHistory = useMemo(
         () =>
             rows
@@ -185,10 +194,28 @@ export default function LiveDashboard() {
                 .filter((v) => Number.isFinite(v)),
         [rows],
     );
+    const battTempHistory = useMemo(
+        () =>
+            rows
+                .slice(0, 60)
+                .map((r) => r.suhu_baterai)
+                .reverse()
+                .filter((v) => Number.isFinite(v)),
+        [rows],
+    );
+    const wheelRpmHistory = useMemo(
+        () =>
+            rows
+                .slice(0, 60)
+                .map((r) => r.rpm_wheel ?? 0)
+                .reverse()
+                .filter((v) => Number.isFinite(v)),
+        [rows],
+    );
 
     return (
         <AppShell>
-            <div className="flex h-screen w-full flex-1 flex-col gap-2 overflow-hidden rounded-tl-2xl border border-neutral-200 bg-white p-2 sm:gap-3 sm:p-3 dark:border-neutral-700 dark:bg-neutral-900">
+            <div className="flex w-full flex-1 flex-col gap-2 overflow-y-auto rounded-tl-2xl border border-neutral-200 bg-white p-2 pb-6 sm:gap-3 sm:p-3 sm:pb-8 dark:border-neutral-700 dark:bg-neutral-900">
                 <div className="dark:to-neutral-850 flex flex-shrink-0 flex-col gap-3 rounded-xl border border-neutral-300 bg-gradient-to-r from-slate-50 to-slate-100 p-3 sm:p-4 dark:border-neutral-700 dark:from-neutral-800">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div className="flex items-center gap-2 sm:gap-3">
@@ -202,7 +229,7 @@ export default function LiveDashboard() {
                         </div>
                         <div className="flex items-center justify-between gap-2 sm:justify-end">
                             <div className="flex flex-col items-start sm:items-end">
-                                <span className="text-xs font-medium text-gray-500 dark:text-gray-400">DATA STREAM</span>
+                                <span className="text-xs font-medium text-gray-500 dark:text-gray-400">STATUS</span>
                                 <span className={`text-sm font-bold ${connected && dataActive ? 'text-green-600' : 'text-red-600'}`}>
                                     {connected && dataActive ? 'LIVE' : 'OFFLINE'}
                                 </span>
@@ -214,26 +241,41 @@ export default function LiveDashboard() {
                     </div>
                 </div>
 
-                <div className="flex flex-shrink-0 flex-col gap-2 sm:gap-4 lg:grid lg:grid-cols-8">
-                    <div className="order-1 flex flex-col rounded-xl border border-neutral-800 bg-neutral-950/70 lg:order-2 lg:col-span-2">
-                        <div className="-mb-13 flex min-h-[120px] flex-1 items-center justify-center p-1 sm:min-h-[140px]">
-                            <SpeedGauge value={speed} />
+                {/* Speed Gauge - Paling Atas dan Tengah */}
+                <div className="flex justify-center">
+                    <div className="w-full max-w-md">
+                        <div className="flex flex-col rounded-xl border border-neutral-800 bg-neutral-950/70">
+                            <div className="-mb-13 flex min-h-[160px] flex-1 items-center justify-center p-1 sm:min-h-[180px]">
+                                <SpeedGauge value={speed} />
+                            </div>
                         </div>
-                    </div>
-
-                    <div className="order-2 lg:order-1 lg:col-span-3">
-                        <StatCard title="Current" value={current} unit="A" trend={currentHistory as number[]} accent="blue" />
-                    </div>
-
-                    <div className="order-3 lg:order-3 lg:col-span-3">
-                        <StatCard title="ESC Temp" value={escTemp} unit="°C" trend={escTempHistory as number[]} accent="red" />
                     </div>
                 </div>
 
-                <div className="z-20 flex min-h-0 flex-1 flex-col rounded-xl border border-neutral-800 bg-neutral-950/70 p-1 sm:p-2">
-                    <div className="min-h-[250px] flex-1 md:min-h-[300px]">
-                        <LiveMap lat={lat} lng={lng} follow height="100%" className="h-full overflow-hidden rounded-lg" />
-                    </div>
+                {/* All Charts in Full Width Rows */}
+                {/* Speed Chart */}
+                <div className="grid grid-cols-1 gap-2 sm:gap-4">
+                    <StatCard title="Speed" value={speed} unit="km/h" trend={speedHistory as number[]} accent="blue" />
+                </div>
+
+                {/* Current Chart */}
+                <div className="grid grid-cols-1 gap-2 sm:gap-4">
+                    <StatCard title="Current" value={current} unit="A" trend={currentHistory as number[]} accent="green" />
+                </div>
+
+                {/* ESC Temperature Chart */}
+                <div className="grid grid-cols-1 gap-2 sm:gap-4">
+                    <StatCard title="ESC Temperature" value={escTemp} unit="°C" trend={escTempHistory as number[]} accent="yellow" />
+                </div>
+
+                {/* Battery Temperature Chart */}
+                <div className="grid grid-cols-1 gap-2 sm:gap-4">
+                    <StatCard title="Battery Temperature" value={battTemp} unit="°C" trend={battTempHistory as number[]} accent="red" />
+                </div>
+
+                {/* Wheel RPM Card */}
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4 lg:grid-cols-1">
+                    <StatCard title="Wheel RPM" value={wheelRpm} unit="RPM" trend={wheelRpmHistory as number[]} accent="purple" />
                 </div>
             </div>
         </AppShell>
