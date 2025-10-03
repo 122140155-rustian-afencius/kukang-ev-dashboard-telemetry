@@ -32,28 +32,37 @@ export default function AppShell({ children }: Props) {
                             ))}
                         </div>
                     </div>
-                    <div className="flex w-full items-center justify-between gap-2">
-                        <SidebarLink
-                            link={{
-                                label: 'Technical Manager',
-                                href: '#',
-                                icon: <img src="/logo-kukang.png" className="h-7 w-7 shrink-0 rounded-full" width={50} height={50} alt="Avatar" />,
-                            }}
-                        />
-                        <Link
-                            href="/logout"
-                            method="post"
-                            as="button"
-                            aria-label="Logout"
-                            title="Logout"
-                            className="ml-auto rounded-md p-1.5 text-neutral-600 hover:bg-neutral-200 dark:text-neutral-200 dark:hover:bg-neutral-700"
+                    {open && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="flex w-full items-center justify-between gap-2"
                         >
-                            <IconLogout className="h-5 w-5" />
-                        </Link>
-                    </div>
+                            <SidebarLink
+                                link={{
+                                    label: 'Technical Manager',
+                                    href: '#',
+                                    icon: (
+                                        <img src="/logo-kukang.png" className="h-7 w-7 shrink-0 rounded-full" width={50} height={50} alt="Avatar" />
+                                    ),
+                                }}
+                            />
+                            <Link
+                                href="/logout"
+                                method="post"
+                                as="button"
+                                aria-label="Logout"
+                                title="Logout"
+                                className="ml-auto rounded-md p-1.5 text-neutral-600 hover:bg-neutral-200 dark:text-neutral-200 dark:hover:bg-neutral-700"
+                            >
+                                <IconLogout className="h-5 w-5" />
+                            </Link>
+                        </motion.div>
+                    )}
                 </SidebarBody>
             </Sidebar>
-            <div className="flex flex-1">{children}</div>
+            <div className={`flex flex-1 transition-all duration-300 ${open ? 'md:pl-[300px]' : 'md:pl-[60px]'}`}>{children}</div>
         </div>
     );
 }

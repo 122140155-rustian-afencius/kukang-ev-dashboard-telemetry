@@ -241,8 +241,7 @@ export default function LiveDashboard() {
                     </div>
                 </div>
 
-                {/* Speed Gauge - Paling Atas dan Tengah */}
-                <div className="flex justify-center">
+                {/* <div className="flex justify-center">
                     <div className="w-full max-w-md">
                         <div className="flex flex-col rounded-xl border border-neutral-800 bg-neutral-950/70">
                             <div className="-mb-13 flex min-h-[160px] flex-1 items-center justify-center p-1 sm:min-h-[180px]">
@@ -250,20 +249,16 @@ export default function LiveDashboard() {
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> */}
 
-                {/* All Charts in Full Width Rows */}
-                {/* Speed Chart */}
                 <div className="grid grid-cols-1 gap-2 sm:gap-4">
                     <StatCard title="Speed" value={speed} unit="km/h" trend={speedHistory as number[]} accent="blue" />
                 </div>
 
-                {/* Current Chart */}
                 <div className="grid grid-cols-1 gap-2 sm:gap-4">
                     <StatCard title="Current" value={current} unit="A" trend={currentHistory as number[]} accent="green" />
                 </div>
 
-                {/* ESC Temperature Chart */}
                 <div className="grid grid-cols-1 gap-2 sm:gap-4">
                     <StatCard title="ESC Temperature" value={escTemp} unit="°C" trend={escTempHistory as number[]} accent="yellow" />
                 </div>
