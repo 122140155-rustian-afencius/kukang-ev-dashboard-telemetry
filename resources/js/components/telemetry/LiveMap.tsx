@@ -34,14 +34,13 @@ export default function LiveMap({ lat, lng, heading, follow = true, height = 340
 
     useEffect(() => {
         if (!divRef.current || mapRef.current) return;
-        const map = L.map(divRef.current, { zoomControl: true, attributionControl: false }).setView([lat || 0, lng || 0], 16);
+        const map = L.map(divRef.current, { zoomControl: true, attributionControl: false }).setView([lat || 0, lng || 0], 20);
         mapRef.current = map;
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            maxZoom: 22,
+            attribution: '&copy; Google',
         }).addTo(map);
 
-        // Create marker with KUKANG icon
         const icon = createKukangIcon(heading ?? 0);
         markerRef.current = L.marker([lat || 0, lng || 0], { icon }).addTo(map);
 
