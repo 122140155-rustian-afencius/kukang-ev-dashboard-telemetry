@@ -1,4 +1,3 @@
-import SpeedGauge from '@/components/telemetry/SpeedGauge';
 import StatCard from '@/components/telemetry/StatCard';
 import AppShell from '@/layouts/AppShell';
 import type { TelemetryPoint } from '@/types/telemetry';
@@ -143,7 +142,6 @@ export default function LiveDashboard() {
                         : null),
             };
 
-            // Update last data time when new telemetry data is received
             setLastDataTime(new Date().toISOString());
 
             setRows((prev) => {
@@ -216,7 +214,7 @@ export default function LiveDashboard() {
     return (
         <AppShell>
             <div className="flex w-full flex-1 flex-col gap-2 overflow-y-auto rounded-tl-2xl border border-neutral-200 bg-white p-2 pb-6 sm:gap-3 sm:p-3 sm:pb-8 dark:border-neutral-700 dark:bg-neutral-900">
-                <div className="dark:to-neutral-850 flex flex-shrink-0 flex-col gap-3 rounded-xl border border-neutral-300 bg-gradient-to-r from-slate-50 to-slate-100 p-3 sm:p-4 dark:border-neutral-700 dark:from-neutral-800">
+                <div className="flex flex-shrink-0 flex-col gap-3 rounded-xl border border-neutral-300 bg-slate-50 p-3 sm:p-4 dark:border-neutral-700 dark:bg-neutral-800">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div className="flex items-center gap-2 sm:gap-3">
                             <div className="h-8 w-8 flex-shrink-0 sm:h-10 sm:w-10">
