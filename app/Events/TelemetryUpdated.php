@@ -3,13 +3,15 @@
 namespace App\Events;
 
 use Illuminate\Broadcasting\Channel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Arr;
 
-class TelemetryUpdated implements ShouldBroadcast
+class TelemetryUpdated implements ShouldBroadcastNow
 {
-    use SerializesModels;
+    use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public array $payload;
 
@@ -43,6 +45,7 @@ class TelemetryUpdated implements ShouldBroadcast
             'gyro_x' => $this->payload['gyro_x'] ?? Arr::get($this->payload, 'gyro.x'),
             'gyro_y' => $this->payload['gyro_y'] ?? Arr::get($this->payload, 'gyro.y'),
             'gyro_z' => $this->payload['gyro_z'] ?? Arr::get($this->payload, 'gyro.z'),
+            'heading' => $this->payload['heading'] ?? null,
         ];
     }
 }

@@ -30,7 +30,7 @@ window.Echo = new Echo({
 
 createInertiaApp({
     title: (title) => (title ? `${title} - KUKANG EV ITERA` : 'KUKANG EV ITERA'),
-    resolve: (name) => resolvePageComponent(`./Pages/${name}.tsx`, import.meta.glob('./Pages/**/*.tsx')),
+    resolve: (name) => resolvePageComponent(`./pages/${name}.tsx`, import.meta.glob('./pages/**/*.tsx')),
     setup({ el, App, props }) {
         createRoot(el).render(
             <ThemeProvider defaultTheme="system" storageKey="kukang-ev-theme">

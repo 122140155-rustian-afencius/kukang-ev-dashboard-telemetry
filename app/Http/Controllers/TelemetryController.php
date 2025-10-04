@@ -119,6 +119,11 @@ class TelemetryController extends Controller
         return Inertia::render('Telemetry/History');
     }
 
+    public function maps()
+    {
+        return Inertia::render('Maps');
+    }
+
     public function status()
     {
         return response()->json($this->statusService->getStatus());

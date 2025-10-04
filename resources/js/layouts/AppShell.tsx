@@ -1,6 +1,6 @@
 import { Sidebar, SidebarBody, SidebarLink } from '@/components/ui/sidebar';
 import { Link } from '@inertiajs/react';
-import { IconGauge, IconHistory, IconLogout, IconSettings, IconUserBolt } from '@tabler/icons-react';
+import { IconGauge, IconHistory, IconLogout, IconMap, IconSettings, IconUserBolt } from '@tabler/icons-react';
 import { motion } from 'motion/react';
 import { useMemo, useState } from 'react';
 
@@ -14,6 +14,7 @@ export default function AppShell({ children }: Props) {
         () => [
             { label: 'Dashboard', href: '/dashboard', icon: <IconGauge className="h-5 w-5 shrink-0 text-neutral-200" /> },
             { label: 'History', href: '/history', icon: <IconHistory className="h-5 w-5 shrink-0 text-neutral-200" /> },
+            { label: 'Maps', href: '/maps', icon: <IconMap className="h-5 w-5 shrink-0 text-neutral-200" /> },
             { label: 'Profile', href: '#', icon: <IconUserBolt className="h-5 w-5 shrink-0 text-neutral-200" /> },
             { label: 'Settings', href: '#', icon: <IconSettings className="h-5 w-5 shrink-0 text-neutral-200" /> },
         ],

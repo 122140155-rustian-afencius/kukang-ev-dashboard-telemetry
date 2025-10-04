@@ -1,15 +1,15 @@
-import StatCard from '@/components/telemetry/StatCard';
+import LiveMap from '@/components/telemetry/LiveMap';
 import AppShell from '@/layouts/AppShell';
 import type { TelemetryPoint } from '@/types/telemetry';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface Connection {
     bind: (event: string, cb: () => void) => void;
     unbind: (event: string, cb: () => void) => void;
 }
 
-export default function LiveDashboard() {
-    const [rows, setRows] = useState<TelemetryPoint[]>([]);
+export default function Maps() {
+    const [latestPoint, setLatestPoint] = useState<TelemetryPoint | null>(null);
     const [connected, setConnected] = useState(false);
     const [dataActive, setDataActive] = useState(false);
     const [lastDataTime, setLastDataTime] = useState<string | null>(null);
@@ -83,7 +83,7 @@ export default function LiveDashboard() {
         const channel = window.Echo.channel('telemetry.kukang');
         const handler = (e: unknown) => {
             const payload = e as Record<string, unknown>;
-            const row: TelemetryPoint = {
+            const point: TelemetryPoint = {
                 ts: String(payload.ts ?? ''),
                 lat: typeof payload.lat === 'number' ? (payload.lat as number) : Number.NaN,
                 lng: typeof payload.lng === 'number' ? (payload.lng as number) : Number.NaN,
@@ -110,7 +110,6 @@ export default function LiveDashboard() {
                 suhu_baterai: typeof payload.suhu_baterai === 'number' ? (payload.suhu_baterai as number) : Number.NaN,
                 suhu_motor: typeof payload.suhu_motor === 'number' ? (payload.suhu_motor as number) : Number.NaN,
                 rpm_wheel: (payload.rpm_wheel as number) ?? null,
-                heading: typeof payload.heading === 'number' ? (payload.heading as number) : null,
                 acc_x:
                     (payload.acc_x as number) ??
                     (typeof payload.accel === 'object' && payload.accel && typeof (payload.accel as Record<string, unknown>).x === 'number'
@@ -141,15 +140,15 @@ export default function LiveDashboard() {
                     (typeof payload.gyro === 'object' && payload.gyro && typeof (payload.gyro as Record<string, unknown>).z === 'number'
                         ? ((payload.gyro as Record<string, unknown>).z as number)
                         : null),
+                heading: typeof payload.heading === 'number' ? (payload.heading as number) : null,
             };
 
             setLastDataTime(new Date().toISOString());
 
-            setRows((prev) => {
-                const next = [row, ...prev];
-                const MAX = 1000;
-                return next.length > MAX ? next.slice(0, MAX) : next;
-            });
+            // Update latest point jika ada koordinat valid
+            if (Number.isFinite(point.lat) && Number.isFinite(point.lng)) {
+                setLatestPoint(point);
+            }
         };
         channel.listen('TelemetryUpdated', handler);
         channel.listen('App\\Events\\TelemetryUpdated', handler as unknown as () => void);
@@ -159,62 +158,12 @@ export default function LiveDashboard() {
             window.Echo.leave('telemetry.kukang');
         };
     }, []);
-    const latest = rows[0];
-    const speed = Number.isFinite(latest?.speed_kmh) ? (latest!.speed_kmh as number) : 0;
-    const current = Number.isFinite(latest?.current_a) ? (latest!.current_a as number) : 0;
-    const escTemp = Number.isFinite(latest?.suhu_esc) ? (latest!.suhu_esc as number) : 0;
-    const battTemp = Number.isFinite(latest?.suhu_baterai) ? (latest!.suhu_baterai as number) : 0;
-    const wheelRpm = Number.isFinite(latest?.rpm_wheel) ? (latest!.rpm_wheel as number) : 0;
 
-    const speedHistory = useMemo(
-        () =>
-            rows
-                .slice(0, 60)
-                .map((r) => r.speed_kmh)
-                .reverse()
-                .filter((v) => Number.isFinite(v)),
-        [rows],
-    );
-    const currentHistory = useMemo(
-        () =>
-            rows
-                .slice(0, 60)
-                .map((r) => r.current_a)
-                .reverse()
-                .filter((v) => Number.isFinite(v)),
-        [rows],
-    );
-    const escTempHistory = useMemo(
-        () =>
-            rows
-                .slice(0, 60)
-                .map((r) => r.suhu_esc)
-                .reverse()
-                .filter((v) => Number.isFinite(v)),
-        [rows],
-    );
-    const battTempHistory = useMemo(
-        () =>
-            rows
-                .slice(0, 60)
-                .map((r) => r.suhu_baterai)
-                .reverse()
-                .filter((v) => Number.isFinite(v)),
-        [rows],
-    );
-    const wheelRpmHistory = useMemo(
-        () =>
-            rows
-                .slice(0, 60)
-                .map((r) => r.rpm_wheel ?? 0)
-                .reverse()
-                .filter((v) => Number.isFinite(v)),
-        [rows],
-    );
-
+    // Render map dengan LiveMap component
     return (
         <AppShell>
-            <div className="flex w-full flex-1 flex-col gap-2 overflow-y-auto rounded-tl-2xl border border-neutral-200 bg-white p-2 pb-6 sm:gap-3 sm:p-3 sm:pb-8 dark:border-neutral-700 dark:bg-neutral-900">
+            <div className="flex w-full flex-1 flex-col gap-2 overflow-y-auto rounded-tl-2xl border border-neutral-200 bg-white p-2 sm:gap-3 sm:p-3 dark:border-neutral-700 dark:bg-neutral-900">
+                {/* Header - Consistent with LiveDashboard */}
                 <div className="flex flex-shrink-0 flex-col gap-3 rounded-xl border border-neutral-300 bg-slate-50 p-3 sm:p-4 dark:border-neutral-700 dark:bg-neutral-800">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div className="flex items-center gap-2 sm:gap-3">
@@ -240,36 +189,34 @@ export default function LiveDashboard() {
                     </div>
                 </div>
 
-                {/* <div className="flex justify-center">
-                    <div className="w-full max-w-md">
-                        <div className="flex flex-col rounded-xl border border-neutral-800 bg-neutral-950/70">
-                            <div className="-mb-13 flex min-h-[160px] flex-1 items-center justify-center p-1 sm:min-h-[180px]">
-                                <SpeedGauge value={speed} />
+                {/* Map Card */}
+                <div className="flex flex-1 flex-col gap-2 rounded-xl border border-neutral-300 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-800">
+                    {latestPoint && Number.isFinite(latestPoint.lat) && Number.isFinite(latestPoint.lng) ? (
+                        <div className="relative h-full min-h-[500px] w-full overflow-hidden rounded-lg">
+                            <LiveMap
+                                lat={latestPoint.lat}
+                                lng={latestPoint.lng}
+                                heading={latestPoint.heading}
+                                follow={true}
+                                height="100%"
+                                className="h-full w-full"
+                            />
+                        </div>
+                    ) : (
+                        <div className="flex h-full min-h-[500px] w-full items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-900">
+                            <div className="text-center">
+                                <svg className="mx-auto h-24 w-24 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
+                                    />
+                                </svg>
+                                <p className="mt-4 text-gray-600 dark:text-gray-400">Waiting for GPS data...</p>
                             </div>
                         </div>
-                    </div>
-                </div> */}
-
-                <div className="grid grid-cols-1 gap-2 sm:gap-4">
-                    <StatCard title="Speed" value={speed} unit="km/h" trend={speedHistory as number[]} accent="blue" />
-                </div>
-
-                <div className="grid grid-cols-1 gap-2 sm:gap-4">
-                    <StatCard title="Current" value={current} unit="A" trend={currentHistory as number[]} accent="green" />
-                </div>
-
-                <div className="grid grid-cols-1 gap-2 sm:gap-4">
-                    <StatCard title="ESC Temperature" value={escTemp} unit="°C" trend={escTempHistory as number[]} accent="yellow" />
-                </div>
-
-                {/* Battery Temperature Chart */}
-                <div className="grid grid-cols-1 gap-2 sm:gap-4">
-                    <StatCard title="Battery Temperature" value={battTemp} unit="°C" trend={battTempHistory as number[]} accent="red" />
-                </div>
-
-                {/* Wheel RPM Card */}
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4 lg:grid-cols-1">
-                    <StatCard title="Wheel RPM" value={wheelRpm} unit="RPM" trend={wheelRpmHistory as number[]} accent="purple" />
+                    )}
                 </div>
             </div>
         </AppShell>

@@ -84,6 +84,7 @@ class MqttPublishTelemetry extends Command
         $lngBase = 106.816666;
         $lat = $latBase + $this->randFloat(-0.01, 0.01);
         $lng = $lngBase + $this->randFloat(-0.01, 0.01);
+        $heading = $this->randFloat(0, 360); // GPS heading in degrees
 
         return [
             'ts' => $now,
@@ -94,6 +95,7 @@ class MqttPublishTelemetry extends Command
             'tegangan' => round($tegangan, 2),
             'lat' => round($lat, 6),
             'lng' => round($lng, 6),
+            'heading' => round($heading, 2),
             'kecepatan' => round($kecepatan, 2),
             'rpm_motor' => $rpmMotor,
             'rpm_wheel' => $rpmWheel,

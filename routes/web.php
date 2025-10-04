@@ -19,9 +19,10 @@ Route::middleware('guest')->group(function () {
 // Authenticated routes
 Route::middleware('auth')->group(function () {
     // Redirect /telemetry to the dashboard to keep one unified layout
-    Route::get('telemetry', fn () => redirect()->route('dashboard'))->name('telemetry.overview');
+    Route::get('telemetry', fn() => redirect()->route('dashboard'))->name('telemetry.overview');
     Route::get('dashboard', [TelemetryController::class, 'live'])->name('dashboard');
     Route::get('history', [TelemetryController::class, 'history'])->name('history');
+    Route::get('maps', [TelemetryController::class, 'maps'])->name('maps');
 
     Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
 });

@@ -10,22 +10,40 @@ use Illuminate\Support\Arr;
 class TelemetryData
 {
     public CarbonImmutable $ts;
+
     public ?float $lat;
+
     public ?float $lng;
+
     public ?float $speedKmh;
+
     public ?float $currentA;
+
     public ?float $voltageV;
+
     public ?float $rpmMotor;
+
     public ?float $rpmWheel;
+
     public ?float $escTemp;
+
     public ?float $battTemp;
+
     public ?float $motorTemp;
+
     public ?float $accX;
+
     public ?float $accY;
+
     public ?float $accZ;
+
     public ?float $gyroX;
+
     public ?float $gyroY;
+
     public ?float $gyroZ;
+
+    public ?float $heading;
 
     public function __construct(
         CarbonImmutable $ts,
@@ -45,6 +63,7 @@ class TelemetryData
         ?float $gyroX = null,
         ?float $gyroY = null,
         ?float $gyroZ = null,
+        ?float $heading = null,
     ) {
         $this->ts = $ts;
         $this->lat = $lat;
@@ -63,13 +82,14 @@ class TelemetryData
         $this->gyroX = $gyroX;
         $this->gyroY = $gyroY;
         $this->gyroZ = $gyroZ;
+        $this->heading = $heading;
     }
 
     /**
      * Normalize incoming MQTT payload keys into a typed DTO.
      * Accepts both English and Indonesian field aliases.
      *
-     * @param array<string,mixed> $payload
+     * @param  array<string,mixed>  $payload
      */
     public static function fromMqttPayload(array $payload): self
     {
@@ -93,6 +113,7 @@ class TelemetryData
         $gyroX = self::toFloat($payload['gyro_x'] ?? Arr::get($payload, 'gyro.x'));
         $gyroY = self::toFloat($payload['gyro_y'] ?? Arr::get($payload, 'gyro.y'));
         $gyroZ = self::toFloat($payload['gyro_z'] ?? Arr::get($payload, 'gyro.z'));
+        $heading = self::toFloat($payload['heading'] ?? null);
 
         return new self(
             $ts,
@@ -112,6 +133,7 @@ class TelemetryData
             $gyroX,
             $gyroY,
             $gyroZ,
+            $heading,
         );
     }
 
@@ -139,6 +161,7 @@ class TelemetryData
             'gyro_x' => $this->gyroX,
             'gyro_y' => $this->gyroY,
             'gyro_z' => $this->gyroZ,
+            'heading' => $this->heading,
         ];
     }
 
@@ -167,6 +190,7 @@ class TelemetryData
             'gyro_x' => $this->gyroX,
             'gyro_y' => $this->gyroY,
             'gyro_z' => $this->gyroZ,
+            'heading' => $this->heading,
         ];
     }
 
@@ -182,7 +206,7 @@ class TelemetryData
             return (float) $value;
         }
         $f = filter_var($value, FILTER_VALIDATE_FLOAT, FILTER_FLAG_ALLOW_THOUSAND);
+
         return $f === false ? null : (float) $f;
     }
 }
-

@@ -17,4 +17,5 @@ export interface TelemetryPoint {
     gyro_x?: number | null;
     gyro_y?: number | null;
     gyro_z?: number | null;
+    heading?: number | null; // GPS heading in degrees (0-359)
 }
